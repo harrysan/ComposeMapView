@@ -1,0 +1,1637 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ComposeMap</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  /* Layout: editor YAML di kiri penuh; diagram + panel detail di kanan atas; daftar masalah di kanan bawah. */
+  --bg: #f2f4f8;
+  --surface: #ffffff;
+  --surface-2: #f6f8fb;
+  --ink: #142033;
+  --muted: #5b687c;
+  --line: #d7dde7;
+  --accent: #2759d0;
+  --accent-soft: rgba(39, 89, 208, .12);
+  --canvas: #edf1f6;
+  --dot: #cfd7e3;
+  --err: #c62f37;
+  --warn: #a96400;
+  --info: #0f7d86;
+  --n1: #2759d0; --n2: #0d8a68; --n3: #b0449f; --n4: #c0630f; --n5: #5b53d3; --n6: #0b7ba3;
+  --syn-key: #7a3ba6; --syn-str: #0d7552; --syn-num: #a85300; --syn-var: #b0207a;
+  --font-ui: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0d1219; --surface: #141b26; --surface-2: #18202d; --ink: #e1e7f0; --muted: #8f9cb2; --line: #263143;
+    --accent: #7ca3ff; --accent-soft: rgba(124, 163, 255, .16); --canvas: #10171f; --dot: #212b3a;
+    --err: #ff6d72; --warn: #f0b04c; --info: #4cc6c6;
+    --n1: #7ca3ff; --n2: #3fcf9c; --n3: #e27fd4; --n4: #f0a050; --n5: #a39dff; --n6: #4fc0e8;
+    --syn-key: #cf9cf0; --syn-str: #7fd6a8; --syn-num: #f0a35e; --syn-var: #ff8ac9;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0d1219; --surface: #141b26; --surface-2: #18202d; --ink: #e1e7f0; --muted: #8f9cb2; --line: #263143;
+  --accent: #7ca3ff; --accent-soft: rgba(124, 163, 255, .16); --canvas: #10171f; --dot: #212b3a;
+  --err: #ff6d72; --warn: #f0b04c; --info: #4cc6c6;
+  --n1: #7ca3ff; --n2: #3fcf9c; --n3: #e27fd4; --n4: #f0a050; --n5: #a39dff; --n6: #4fc0e8;
+  --syn-key: #cf9cf0; --syn-str: #7fd6a8; --syn-num: #f0a35e; --syn-var: #ff8ac9;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+body {
+  background: var(--bg); color: var(--ink);
+  font: 14px/1.45 var(--font-ui);
+  display: flex; flex-direction: column;
+}
+button, select, input { font: inherit; color: inherit; }
+.mono { font-family: var(--font-mono); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* ---------- top bar ---------- */
+.top {
+  display: flex; align-items: center; gap: 12px 20px; flex-wrap: wrap;
+  padding: 10px 16px; background: var(--surface); border-bottom: 1px solid var(--line);
+}
+.brand { display: flex; align-items: center; gap: 10px; margin-right: auto; }
+.brand h1 { font-size: 17px; font-weight: 600; margin: 0; letter-spacing: -.01em; }
+.brand .tag { color: var(--muted); font-size: 13px; }
+.actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.actions label.lbl { color: var(--muted); font-size: 13px; }
+select, .btn {
+  height: 32px; padding: 0 12px; border-radius: 7px; border: 1px solid var(--line);
+  background: var(--surface-2); cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-size: 13px;
+}
+select:hover, .btn:hover { border-color: var(--accent); }
+.local {
+  display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted);
+  padding: 4px 10px; border: 1px dashed var(--line); border-radius: 999px;
+}
+
+/* ---------- layout ---------- */
+.layout {
+  flex: 1; min-height: 0;
+  display: grid; grid-template-columns: minmax(300px, 30%) 1fr; grid-template-rows: 1fr 230px;
+  gap: 1px; background: var(--line);
+}
+.pane { background: var(--surface); display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+.editor-pane { grid-row: 1 / 3; }
+.pane-head {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  min-height: 42px; padding: 6px 14px; border-bottom: 1px solid var(--line); font-size: 13px;
+}
+.pane-head .title { font-weight: 600; }
+.pane-head .spacer { margin-left: auto; }
+.chip {
+  display: inline-flex; align-items: center; gap: 5px; height: 24px; padding: 0 9px; border-radius: 999px;
+  background: var(--surface-2); border: 1px solid var(--line); font-size: 12px; color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.chip b { color: var(--ink); font-weight: 600; }
+.status-ok { color: var(--info); }
+.status-bad { color: var(--err); }
+
+/* ---------- editor ---------- */
+.editor { flex: 1; min-height: 0; display: flex; background: var(--surface-2); font: 13px/20px var(--font-mono); }
+.gutter { width: 48px; flex: none; overflow: hidden; border-right: 1px solid var(--line); color: var(--muted); user-select: none; }
+.gutter-inner { padding: 12px 0; will-change: transform; }
+.gutter-inner div { height: 20px; padding-right: 8px; text-align: right; position: relative; font-size: 11.5px; font-variant-numeric: tabular-nums; }
+.gutter-inner div.m-error, .gutter-inner div.m-warning, .gutter-inner div.m-info { color: var(--ink); }
+.gutter-inner div.m-error::before, .gutter-inner div.m-warning::before, .gutter-inner div.m-info::before {
+  content: ""; position: absolute; left: 7px; top: 7px; width: 6px; height: 6px; border-radius: 50%;
+}
+.gutter-inner div.m-error::before { background: var(--err); }
+.gutter-inner div.m-warning::before { background: var(--warn); }
+.gutter-inner div.m-info::before { background: var(--info); }
+.code { position: relative; flex: 1; min-width: 0; overflow: hidden; }
+#hl, #src {
+  position: absolute; inset: 0; margin: 0; padding: 12px 14px; border: 0;
+  font: inherit; white-space: pre; tab-size: 2; overflow: hidden;
+}
+#hl { pointer-events: none; color: var(--ink); }
+#src {
+  background: transparent; color: transparent; caret-color: var(--ink);
+  resize: none; outline: none; overflow: auto;
+}
+#src::selection { background: var(--accent-soft); color: transparent; }
+#hlLine { position: absolute; left: 0; right: 0; height: 20px; background: var(--accent-soft); box-shadow: inset 3px 0 0 var(--accent); pointer-events: none; display: none; }
+.t-key { color: var(--syn-key); }
+.t-str { color: var(--syn-str); }
+.t-num { color: var(--syn-num); }
+.t-var { color: var(--syn-var); font-weight: 500; }
+.t-com { color: var(--muted); font-style: italic; }
+.t-dash { color: var(--muted); }
+
+/* ---------- diagram ---------- */
+.diagram-body { flex: 1; min-height: 0; display: flex; }
+.canvas {
+  position: relative; flex: 1; min-width: 0; overflow: hidden;
+  background-color: var(--canvas);
+  background-image: radial-gradient(var(--dot) 1px, transparent 1.2px);
+  background-size: 20px 20px;
+}
+#svg { width: 100%; height: 100%; display: block; cursor: grab; touch-action: none; }
+#svg.panning { cursor: grabbing; }
+.zoom { position: absolute; top: 12px; right: 12px; display: flex; flex-direction: column; gap: 4px; }
+.zoom button {
+  width: 32px; height: 32px; border-radius: 7px; border: 1px solid var(--line); background: var(--surface);
+  cursor: pointer; display: grid; place-items: center; font-size: 16px; line-height: 1;
+}
+.zoom button:hover { border-color: var(--accent); }
+.legend {
+  position: absolute; left: 12px; bottom: 12px; display: flex; gap: 14px; flex-wrap: wrap; align-items: center;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px;
+  font-size: 11.5px; color: var(--muted); max-width: calc(100% - 24px);
+}
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.banner {
+  position: absolute; top: 12px; left: 12px; right: 60px; padding: 8px 12px; border-radius: 8px;
+  background: var(--surface); border: 1px solid var(--err); color: var(--ink); font-size: 13px;
+}
+.empty { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; color: var(--muted); padding: 24px; }
+.empty[hidden], .banner[hidden] { display: none; }
+
+svg text { font-family: var(--font-ui); }
+.card { fill: var(--surface); stroke: var(--line); stroke-width: 1; }
+.svc { cursor: pointer; }
+.svc:hover .card { stroke: var(--muted); }
+.svc.sel .card { stroke: var(--accent); stroke-width: 2; }
+.svc:focus { outline: none; }
+.svc:focus-visible .card { stroke: var(--accent); stroke-dasharray: 4 3; stroke-width: 2; }
+.svc-name { font-size: 13px; font-weight: 600; fill: var(--ink); }
+.svc-img { font: 11px var(--font-mono); fill: var(--muted); }
+.stripe-error { fill: var(--err); } .stripe-warning { fill: var(--warn); } .stripe-info { fill: var(--info); }
+.count-error { fill: var(--err); } .count-warning { fill: var(--warn); } .count-info { fill: var(--info); }
+.count-text { font-size: 10.5px; font-weight: 600; fill: var(--surface); }
+.tag-rect { fill: var(--surface-2); stroke: var(--line); }
+.tag-text { font: 500 10px var(--font-mono); fill: var(--muted); }
+.port rect { fill: var(--surface-2); stroke: var(--line); }
+.port text { font: 10.5px var(--font-mono); fill: var(--ink); }
+.port.bad rect { stroke: var(--err); fill: transparent; }
+.port.bad text { fill: var(--err); }
+.port.risky rect { stroke: var(--warn); }
+.net, .vol { cursor: pointer; }
+.net-rect { stroke-width: 1.4; }
+.net.sel .net-rect, .vol.sel .vol-body, .vol.sel .vol-top { stroke-width: 2.4; }
+.net-name { font-size: 12px; font-weight: 600; fill: var(--ink); }
+.net-sub { font: 10.5px var(--font-mono); fill: var(--muted); }
+.undeclared .net-rect, .undeclared .vol-body, .undeclared .vol-top { stroke: var(--err) !important; stroke-dasharray: 4 3; }
+.vol-body, .vol-top { fill: var(--surface); stroke: var(--muted); stroke-width: 1.2; }
+.vol-name { font: 11px var(--font-mono); fill: var(--ink); }
+.edge { fill: none; transition: opacity .15s; }
+.e-net { stroke-width: 1.6; opacity: .55; }
+.e-vol { stroke: var(--muted); stroke-width: 1.2; opacity: .55; }
+.e-dep { stroke: var(--muted); stroke-width: 1.6; stroke-dasharray: 6 4; }
+.e-dep.cycle { stroke: var(--err); }
+.edge.hot { opacity: 1; stroke-width: 2.4; }
+.e-dep.hot:not(.cycle) { stroke: var(--accent); }
+.dep-label rect { fill: var(--surface); stroke: var(--line); }
+.dep-label text { font: 500 10px var(--font-mono); fill: var(--muted); }
+.arrow-muted { fill: var(--muted); } .arrow-err { fill: var(--err); } .arrow-accent { fill: var(--accent); }
+.node, .dep-label { transition: opacity .15s; }
+.dim { opacity: .14; }
+
+/* ---------- detail ---------- */
+.detail { width: 300px; flex: none; border-left: 1px solid var(--line); overflow: auto; padding: 16px; font-size: 13px; }
+.d-kind { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 600; }
+.detail h2 { margin: 2px 0 2px; font-size: 18px; text-wrap: balance; word-break: break-word; }
+.d-sub { color: var(--muted); font-size: 12px; word-break: break-all; }
+.detail section { margin-top: 16px; }
+.detail h3 { margin: 0 0 6px; font-size: 12px; font-weight: 600; color: var(--muted); }
+.rows { display: flex; flex-direction: column; gap: 4px; }
+.row {
+  display: flex; align-items: baseline; gap: 8px; padding: 5px 8px; border-radius: 6px; background: var(--surface-2);
+  font-size: 12.5px; min-width: 0; text-align: left; border: 1px solid transparent; width: 100%;
+}
+.row .mono { font-size: 12px; word-break: break-all; }
+.row .r-muted { color: var(--muted); }
+.row .r-right { margin-left: auto; flex: none; color: var(--muted); font-size: 11.5px; }
+button.row { cursor: pointer; }
+button.row:hover { border-color: var(--accent); }
+.dot { width: 8px; height: 8px; border-radius: 50%; flex: none; display: inline-block; transform: translateY(-1px); }
+.none { color: var(--muted); font-size: 12.5px; }
+.goto { margin-top: 18px; background: none; border: 0; padding: 0; color: var(--accent); cursor: pointer; font-size: 12.5px; }
+.goto:hover { text-decoration: underline; }
+.overview p { margin: 6px 0; color: var(--muted); max-width: 65ch; }
+
+/* ---------- issues ---------- */
+.filters { display: flex; gap: 4px; flex-wrap: wrap; }
+.filters button {
+  height: 26px; padding: 0 10px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface-2);
+  cursor: pointer; font-size: 12px; display: inline-flex; align-items: center; gap: 5px; font-variant-numeric: tabular-nums;
+}
+.filters button[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); }
+#issues { list-style: none; margin: 0; padding: 4px 0; overflow: auto; flex: 1; }
+#issues li button {
+  width: 100%; display: grid; grid-template-columns: 18px 64px 1fr auto; gap: 10px; align-items: baseline;
+  padding: 7px 14px; border: 0; background: none; text-align: left; cursor: pointer; border-left: 3px solid transparent;
+}
+#issues li button:hover { background: var(--surface-2); }
+#issues li button.active { background: var(--accent-soft); border-left-color: var(--accent); }
+.sev { font-size: 12px; text-align: center; }
+.sev-error { color: var(--err); } .sev-warning { color: var(--warn); } .sev-info { color: var(--info); }
+.rule { font: 500 11.5px var(--font-mono); color: var(--muted); }
+.msg { font-size: 13px; }
+.hint { display: block; font-size: 12px; color: var(--muted); margin-top: 1px; }
+.ln { font: 11.5px var(--font-mono); color: var(--muted); }
+.all-clear { padding: 18px 14px; color: var(--info); font-size: 13px; }
+
+@media (prefers-reduced-motion: reduce) { .edge, .node, .dep-label { transition: none; } }
+
+@media (max-width: 980px) {
+  html, body { height: auto; }
+  .layout { grid-template-columns: 1fr; grid-template-rows: 340px auto 300px; }
+  .editor-pane { grid-row: auto; }
+  .diagram-body { flex-direction: column; }
+  .canvas { height: 460px; flex: none; }
+  .detail { width: auto; border-left: 0; border-top: 1px solid var(--line); }
+  .brand .tag { display: none; }
+}
+@media (max-width: 520px) {
+  #issues li button { grid-template-columns: 16px 1fr auto; }
+  .rule { display: none; }
+  .local { display: none; }
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true">
+      <rect x="1" y="1" width="24" height="24" rx="6" fill="var(--accent)"/>
+      <circle cx="8" cy="9" r="2.6" fill="var(--surface)"/>
+      <circle cx="18" cy="9" r="2.6" fill="var(--surface)"/>
+      <circle cx="13" cy="18" r="2.6" fill="var(--surface)"/>
+      <path d="M8 9 L13 18 L18 9" stroke="var(--surface)" stroke-width="1.6" fill="none"/>
+    </svg>
+    <h1>ComposeMap</h1>
+    <span class="tag">Visualizer &amp; linter docker-compose</span>
+  </div>
+  <div class="actions">
+    <label class="lbl" for="example">Contoh</label>
+    <select id="example">
+      <option value="laravel">Laravel + MySQL + Redis</option>
+      <option value="micro">Microservices (banyak masalah)</option>
+      <option value="wordpress">WordPress (bersih)</option>
+      <option value="custom" hidden>File kamu</option>
+    </select>
+    <label class="btn" for="file">
+      <svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 11V2M4.5 5.5 8 2l3.5 3.5M2 11v3h12v-3" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+      Buka file
+    </label>
+    <input type="file" id="file" accept=".yml,.yaml,text/yaml" hidden>
+    <span class="local" title="Semua analisis berjalan di browser kamu.">
+      <svg width="12" height="12" viewBox="0 0 16 16" aria-hidden="true"><rect x="3" y="7" width="10" height="7" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
+      Diproses di browser, tidak diunggah
+    </span>
+  </div>
+</header>
+
+<main class="layout">
+  <section class="pane editor-pane" aria-label="Editor YAML">
+    <div class="pane-head">
+      <span class="title mono">docker-compose.yml</span>
+      <span class="spacer"></span>
+      <span id="parseState" class="chip"></span>
+    </div>
+    <div class="editor">
+      <div class="gutter" aria-hidden="true"><div class="gutter-inner" id="gutterInner"></div></div>
+      <div class="code">
+        <div id="hlLine"></div>
+        <pre id="hl" aria-hidden="true"></pre>
+        <textarea id="src" wrap="off" spellcheck="false" autocapitalize="off" autocomplete="off" aria-label="Isi docker-compose.yml"></textarea>
+      </div>
+    </div>
+  </section>
+
+  <section class="pane diagram-pane" aria-label="Diagram">
+    <div class="pane-head">
+      <span class="title">Diagram</span>
+      <span id="stats" class="actions"></span>
+      <span class="spacer"></span>
+      <label class="chip" for="tPorts"><input type="checkbox" id="tPorts" checked> Port</label>
+      <label class="chip" for="tVols"><input type="checkbox" id="tVols" checked> Volume</label>
+    </div>
+    <div class="diagram-body">
+      <div class="canvas" id="canvas">
+        <svg id="svg" role="img" aria-label="Diagram service, network, dan volume">
+          <defs>
+            <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="arrow-muted" d="M0 0 L10 5 L0 10 z"/></marker>
+            <marker id="arrErr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="arrow-err" d="M0 0 L10 5 L0 10 z"/></marker>
+            <marker id="arrHot" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="arrow-accent" d="M0 0 L10 5 L0 10 z"/></marker>
+          </defs>
+          <g id="viewport"></g>
+        </svg>
+        <div class="banner" id="staleBanner" hidden></div>
+        <div class="empty" id="empty" hidden>Belum ada service untuk digambar.<br>Tempel isi docker-compose.yml di editor, atau pilih contoh.</div>
+        <div class="zoom">
+          <button id="zIn" aria-label="Perbesar">+</button>
+          <button id="zOut" aria-label="Perkecil">−</button>
+          <button id="zFit" aria-label="Pas ke layar" title="Pas ke layar">
+            <svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 6V2h4M10 2h4v4M14 10v4h-4M6 14H2v-4" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+          </button>
+        </div>
+        <div class="legend">
+          <span><svg width="22" height="8"><path d="M1 4h20" stroke="var(--n1)" stroke-width="2"/></svg>Network</span>
+          <span><svg width="24" height="8"><path d="M1 4h16" stroke="var(--muted)" stroke-width="1.6" stroke-dasharray="5 3"/><path d="M16 0 L23 4 L16 8z" fill="var(--muted)"/></svg>depends_on</span>
+          <span><svg width="14" height="14"><path d="M1 3 a6 2.4 0 0 0 12 0 v8 a6 2.4 0 0 1 -12 0z" fill="none" stroke="var(--muted)"/><ellipse cx="7" cy="3" rx="6" ry="2.4" fill="none" stroke="var(--muted)"/></svg>Named volume</span>
+          <span>Scroll untuk zoom, seret untuk geser</span>
+        </div>
+      </div>
+      <aside class="detail" id="detail" aria-live="polite"></aside>
+    </div>
+  </section>
+
+  <section class="pane issues-pane" aria-label="Masalah">
+    <div class="pane-head">
+      <span class="title">Masalah</span>
+      <div class="filters" id="filters"></div>
+    </div>
+    <ul id="issues"></ul>
+  </section>
+</main>
+
+<script type="text/plain" id="ex-laravel"># Toko online: Laravel + MySQL + Redis
+name: tokoku
+
+services:
+  nginx:
+    image: nginx:1.27-alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./docker/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./src:/var/www/html
+    depends_on:
+      - app
+    networks:
+      - frontend
+
+  app:
+    build:
+      context: .
+      dockerfile: docker/php.Dockerfile
+    volumes:
+      - ./src:/var/www/html
+    environment:
+      DB_HOST: mysql
+      DB_PASSWORD: rahasia123
+      REDIS_HOST: redis
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - frontend
+      - backend
+
+  queue:
+    build: .
+    command: php artisan queue:work
+    depends_on:
+      - mysql
+      - redis
+    networks:
+      - backend
+
+  mysql:
+    image: mysql:8.4
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_DATABASE: tokoku
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+    networks:
+      backend:
+        ipv4_address: 172.28.0.10
+
+  redis:
+    image: redis
+    volumes:
+      - redis-data:/data
+    networks:
+      - backend
+
+  mailpit:
+    image: axllent/mailpit:v1.20
+    ports:
+      - "8025:8025"
+      - "1025:1025"
+    networks:
+      - backend
+
+networks:
+  frontend:
+  backend:
+    ipam:
+      config:
+        - subnet: 172.28.0.0/16
+
+volumes:
+  mysql-data:
+  redis-data:
+  cache-data:
+</script>
+
+<script type="text/plain" id="ex-micro">version: "3.8"
+
+services:
+  gateway:
+    image: traefik:v3.1
+    network_mode: host
+    ports:
+      - "8080:80"
+
+  api:
+    image: ghcr.io/acme/api:2.3.0
+    ports:
+      - "8080:3000"
+    depends_on:
+      - orders
+    networks:
+      - public
+      - internal
+
+  orders:
+    image: ghcr.io/acme/orders:latest
+    ports:
+      - "127.0.0.1:9000-9002:9000-9002"
+    depends_on:
+      - billing
+    networks:
+      internal:
+        ipv4_address: 10.10.5.20
+
+  billing:
+    image: ghcr.io/acme/billing:1.0.4
+    ports:
+      - "9001:9001"
+    depends_on:
+      - orders
+    networks:
+      - internal
+      - cache
+
+  admin:
+    image: ghcr.io/acme/admin:1.1
+    ports:
+      - "8080:8080"
+    networks:
+      - public
+
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+    networks:
+      - internal
+
+  worker:
+    command: node worker.js
+    depends_on:
+      - postgres
+    networks:
+      - internal
+
+networks:
+  public:
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+  internal:
+    ipam:
+      config:
+        - subnet: 172.20.5.0/24
+</script>
+
+<script type="text/plain" id="ex-wordpress">services:
+  wordpress:
+    image: wordpress:6.6-php8.2-apache
+    ports:
+      - "127.0.0.1:8000:80"
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_PASSWORD: ${WP_DB_PASSWORD:-changeme}
+    volumes:
+      - wp-content:/var/www/html/wp-content
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: mariadb:11.4
+    environment:
+      MARIADB_DATABASE: wordpress
+      MARIADB_PASSWORD: ${WP_DB_PASSWORD:-changeme}
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-changeme}
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect"]
+      interval: 10s
+    volumes:
+      - db-data:/var/lib/mysql
+
+volumes:
+  wp-content:
+  db-data:
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
+<script>
+"use strict";
+const $ = (s) => document.querySelector(s);
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const SEV_ORDER = { error: 0, warning: 1, info: 2 };
+const SEV_ICON = { error: "●", warning: "▲", info: "◆" };
+const SECRET_RE = /(PASSWORD|PASSWD|SECRET|TOKEN|API_KEY|APIKEY|PRIVATE_KEY|ACCESS_KEY)/i;
+const DB_PORTS = { 3306: "MySQL", 5432: "PostgreSQL", 6379: "Redis", 27017: "MongoDB", 9200: "Elasticsearch" };
+const NET_COLORS = ["--n1", "--n2", "--n3", "--n4", "--n5", "--n6"];
+
+/* =====================================================================
+   1. Indeks baris: memetakan service/network/volume ke nomor baris
+   ===================================================================== */
+function buildLineIndex(text) {
+  const lines = text.split("\n");
+  const top = {};
+  let cur = null;
+  lines.forEach((l, i) => {
+    const m = /^([A-Za-z0-9_.-]+)\s*:/.exec(l);
+    if (m) {
+      if (cur) cur.end = i - 1;
+      cur = { start: i, end: lines.length - 1 };
+      top[m[1]] = cur;
+    }
+  });
+  function children(key) {
+    const sec = top[key], out = {};
+    if (!sec) return out;
+    let indent = null, c = null;
+    for (let i = sec.start + 1; i <= sec.end; i++) {
+      const l = lines[i];
+      if (!l.trim() || l.trim().startsWith("#")) continue;
+      const ind = l.match(/^\s*/)[0].length;
+      if (indent === null) indent = ind;
+      if (ind === indent) {
+        const m = /^\s*["']?([^"':#]+?)["']?\s*:/.exec(l);
+        if (m) { if (c) c.end = i - 1; c = { start: i, end: sec.end }; out[m[1].trim()] = c; }
+      }
+    }
+    return out;
+  }
+  const S = children("services"), N = children("networks"), V = children("volumes");
+  const find = (r, needle) => {
+    if (!r) return null;
+    for (let i = r.start; i <= r.end; i++) if (lines[i].includes(needle)) return i + 1;
+    return r.start + 1;
+  };
+  return {
+    top: (k) => (top[k] ? top[k].start + 1 : null),
+    service: (n) => (S[n] ? S[n].start + 1 : null),
+    inService: (n, needle) => find(S[n], needle),
+    network: (n) => (N[n] ? N[n].start + 1 : null),
+    inNetwork: (n, needle) => find(N[n], needle),
+    volume: (n) => (V[n] ? V[n].start + 1 : null),
+  };
+}
+
+/* =====================================================================
+   2. Normalizer: semua bentuk penulisan compose -> satu model
+   ===================================================================== */
+const VAR_RE = /\$\$|\$\{([A-Za-z_][A-Za-z0-9_]*)(?:(:?-|:?\?)([^}]*))?\}|\$([A-Za-z_][A-Za-z0-9_]*)/g;
+function interp(str, line, ctx) {
+  if (typeof str !== "string") return { value: str, ok: true };
+  let ok = true;
+  const value = str.replace(VAR_RE, (m, name, op, def, bare) => {
+    if (m === "$$") return "$";
+    const n = name || bare;
+    if (op && op.endsWith("-")) return def;
+    ok = false;
+    if (!ctx.unresolved.has(n)) ctx.unresolved.set(n, line);
+    return m;
+  });
+  return { value, ok };
+}
+const isInterp = (v) => typeof v === "string" && /\$\{|\$[A-Za-z_]/.test(v);
+const toArr = (v) => (Array.isArray(v) ? v : v == null ? [] : [v]);
+
+function parseRange(v) {
+  if (v == null || v === "") return null;
+  const m = /^(\d+)(?:-(\d+))?$/.exec(String(v).trim());
+  if (!m) return null;
+  const a = +m[1], b = m[2] ? +m[2] : a;
+  return { start: a, end: b };
+}
+const rangeStr = (r) => (r ? (r.end > r.start ? `${r.start}-${r.end}` : `${r.start}`) : "?");
+
+function parsePort(p, svc, L, ctx) {
+  if (p && typeof p === "object") {
+    const line = L.inService(svc, "target");
+    let published = null, unresolved = false;
+    if (p.published != null) {
+      const r = interp(String(p.published), line, ctx);
+      if (r.ok) published = parseRange(r.value); else unresolved = true;
+    }
+    const target = parseRange(p.target);
+    return {
+      hostIp: p.host_ip || "0.0.0.0", published, unresolved, target,
+      protocol: (p.protocol || "tcp").toLowerCase(),
+      raw: `${p.host_ip ? p.host_ip + ":" : ""}${p.published != null ? p.published + ":" : ""}${p.target}${p.protocol ? "/" + p.protocol : ""}`,
+      line,
+    };
+  }
+  const rawStr = String(p);
+  const line = L.inService(svc, rawStr);
+  const r = interp(rawStr, line, ctx);
+  let str = r.value, protocol = "tcp";
+  const slash = str.lastIndexOf("/");
+  if (slash > -1) { protocol = str.slice(slash + 1).toLowerCase() || "tcp"; str = str.slice(0, slash); }
+  let hostIp = "0.0.0.0", rest = str, pub, tgt;
+  if (str.startsWith("[")) {
+    const end = str.indexOf("]");
+    hostIp = str.slice(1, end); rest = str.slice(end + 2);
+  }
+  const parts = rest.split(":");
+  if (parts.length >= 3) { hostIp = parts[0]; pub = parts[1]; tgt = parts[2]; }
+  else if (parts.length === 2) { pub = parts[0]; tgt = parts[1]; }
+  else { tgt = parts[0]; }
+  return {
+    hostIp, published: r.ok ? parseRange(pub) : null, unresolved: !r.ok && pub != null,
+    target: parseRange(tgt), protocol, raw: rawStr, line,
+  };
+}
+
+function parseMount(v, svc, L, ctx) {
+  if (v && typeof v === "object") {
+    return {
+      type: v.type || "volume", source: v.source || null, target: v.target || "?",
+      readOnly: !!v.read_only, raw: `${v.source || ""}:${v.target || ""}`, line: L.inService(svc, String(v.target || "volumes:")),
+    };
+  }
+  const raw = String(v);
+  const line = L.inService(svc, raw);
+  const val = interp(raw, line, ctx).value;
+  const parts = val.split(":");
+  if (parts.length === 1) return { type: "volume", source: null, target: parts[0], readOnly: false, anonymous: true, raw, line };
+  const [src, tgt, mode] = parts;
+  const bind = /^[.\/~$]/.test(src) || src.includes("/");
+  return { type: bind ? "bind" : "volume", source: src, target: tgt, readOnly: (mode || "").split(",").includes("ro"), raw, line };
+}
+
+function parseImage(str, resolved) {
+  let name = str, digest = null, tag = null;
+  const at = name.indexOf("@");
+  if (at > -1) { digest = name.slice(at + 1); name = name.slice(0, at); }
+  const slash = name.lastIndexOf("/"), colon = name.lastIndexOf(":");
+  if (colon > slash) { tag = name.slice(colon + 1); name = name.slice(0, colon); }
+  return { name, tag, digest, raw: str, resolved };
+}
+
+function normalize(doc, text) {
+  const L = buildLineIndex(text);
+  const ctx = { unresolved: new Map() };
+  const rawServices = doc.services && typeof doc.services === "object" ? doc.services : {};
+  const services = [];
+
+  for (const [name, raw0] of Object.entries(rawServices)) {
+    const raw = raw0 && typeof raw0 === "object" ? raw0 : {};
+    const line = L.service(name);
+    const s = {
+      name, line, ports: [], networks: [], volumes: [], dependsOn: [], env: [],
+      networkMode: raw.network_mode || null, portsLine: L.inService(name, "ports:"),
+      profiles: toArr(raw.profiles), command: raw.command,
+    };
+    if (raw.image != null) {
+      const r = interp(String(raw.image), L.inService(name, "image:"), ctx);
+      s.image = parseImage(r.value, r.ok);
+    }
+    if (raw.build != null) {
+      s.build = typeof raw.build === "string" ? { context: raw.build } : { context: raw.build.context || ".", dockerfile: raw.build.dockerfile };
+    }
+    for (const p of toArr(raw.ports)) s.ports.push(parsePort(p, name, L, ctx));
+
+    if (Array.isArray(raw.networks)) {
+      for (const n of raw.networks) s.networks.push({ network: String(n), aliases: [], line: L.inService(name, String(n)) });
+    } else if (raw.networks && typeof raw.networks === "object") {
+      for (const [n, cfg0] of Object.entries(raw.networks)) {
+        const cfg = cfg0 || {};
+        const ln = L.inService(name, n);
+        let ip = null;
+        if (cfg.ipv4_address) {
+          const r = interp(String(cfg.ipv4_address), L.inService(name, "ipv4_address"), ctx);
+          ip = r.ok ? r.value : null;
+        }
+        s.networks.push({ network: n, aliases: toArr(cfg.aliases).map(String), ipv4Address: ip, line: ln, ipLine: L.inService(name, "ipv4_address") });
+      }
+    }
+    if (!s.networks.length && !s.networkMode) s.networks.push({ network: "default", aliases: [], implicit: true, line });
+
+    for (const v of toArr(raw.volumes)) s.volumes.push(parseMount(v, name, L, ctx));
+
+    if (Array.isArray(raw.depends_on)) {
+      for (const d of raw.depends_on) s.dependsOn.push({ service: String(d), condition: "service_started", line: L.inService(name, `- ${d}`) });
+    } else if (raw.depends_on && typeof raw.depends_on === "object") {
+      for (const [d, cfg] of Object.entries(raw.depends_on)) {
+        s.dependsOn.push({ service: d, condition: (cfg && cfg.condition) || "service_started", line: L.inService(name, `${d}:`) });
+      }
+    }
+
+    const envEntries = Array.isArray(raw.environment)
+      ? raw.environment.map((e) => { const str = String(e); const i = str.indexOf("="); return i < 0 ? [str, undefined] : [str.slice(0, i), str.slice(i + 1)]; })
+      : raw.environment && typeof raw.environment === "object" ? Object.entries(raw.environment).map(([k, v]) => [k, v == null ? undefined : String(v)]) : [];
+    for (const [key, value] of envEntries) {
+      const ln = L.inService(name, key);
+      if (typeof value === "string") interp(value, ln, ctx);
+      s.env.push({ key, value, isInterpolated: isInterp(value), line: ln });
+    }
+
+    if (raw.healthcheck && typeof raw.healthcheck === "object") {
+      const t = raw.healthcheck.test;
+      s.healthcheck = { test: Array.isArray(t) ? t.join(" ") : t ? String(t) : "", disabled: raw.healthcheck.disable === true || (Array.isArray(t) && t[0] === "NONE") };
+    }
+    services.push(s);
+  }
+
+  // Network top-level + implisit
+  const nets = new Map();
+  const topNets = doc.networks && typeof doc.networks === "object" ? doc.networks : {};
+  for (const [n, cfg0] of Object.entries(topNets)) {
+    const cfg = cfg0 || {};
+    const subnets = [];
+    const conf = cfg.ipam && Array.isArray(cfg.ipam.config) ? cfg.ipam.config : [];
+    for (const c of conf) {
+      if (c && c.subnet) {
+        const r = interp(String(c.subnet), L.inNetwork(n, "subnet"), ctx);
+        if (r.ok) subnets.push(r.value);
+      }
+    }
+    nets.set(n, { name: n, declared: true, external: !!cfg.external, driver: cfg.driver || null, subnets, line: L.network(n), subnetLine: L.inNetwork(n, "subnet") });
+  }
+  for (const s of services) for (const a of s.networks) {
+    if (!nets.has(a.network)) {
+      nets.set(a.network, a.network === "default"
+        ? { name: "default", declared: true, implicit: true, external: false, subnets: [], line: null }
+        : { name: a.network, declared: false, external: false, subnets: [], line: null });
+    }
+  }
+
+  // Volume top-level + yang dipakai tapi tidak dideklarasikan
+  const vols = new Map();
+  const topVols = doc.volumes && typeof doc.volumes === "object" ? doc.volumes : {};
+  for (const [n, cfg0] of Object.entries(topVols)) {
+    const cfg = cfg0 || {};
+    vols.set(n, { name: n, declared: true, external: !!cfg.external, driver: cfg.driver || null, line: L.volume(n), used: false });
+  }
+  for (const s of services) for (const v of s.volumes) {
+    if (v.type !== "volume" || !v.source) continue;
+    if (!vols.has(v.source)) vols.set(v.source, { name: v.source, declared: false, external: false, line: null, used: true });
+    vols.get(v.source).used = true;
+  }
+
+  return {
+    project: doc.name || null,
+    services,
+    networks: [...nets.values()],
+    volumes: [...vols.values()],
+    hasVersion: Object.prototype.hasOwnProperty.call(doc, "version"),
+    versionLine: L.top("version"),
+    unresolved: [...ctx.unresolved.entries()].map(([name, line]) => ({ name, line })),
+  };
+}
+
+/* =====================================================================
+   3. Utilitas CIDR (IPv4)
+   ===================================================================== */
+function ipToInt(ip) {
+  const p = String(ip).trim().split(".");
+  if (p.length !== 4) return null;
+  let n = 0;
+  for (const x of p) { if (!/^\d{1,3}$/.test(x) || +x > 255) return null; n = n * 256 + +x; }
+  return n;
+}
+function cidrRange(c) {
+  const [ip, bits] = String(c).split("/");
+  const n = ipToInt(ip);
+  const b = bits === undefined ? 32 : +bits;
+  if (n === null || !(b >= 0 && b <= 32)) return null;
+  const size = 2 ** (32 - b);
+  const start = Math.floor(n / size) * size;
+  return { start, end: start + size - 1 };
+}
+
+/* =====================================================================
+   4. Aturan linter
+   ===================================================================== */
+function runRules(m) {
+  const out = [];
+  const add = (ruleId, severity, message, hint, keys, line) => out.push({ ruleId, severity, message, hint, keys: keys || [], line: line || null });
+  const sk = (n) => "s:" + n, nk = (n) => "n:" + n, vk = (n) => "v:" + n;
+  const byName = new Map(m.services.map((s) => [s.name, s]));
+  const nets = new Map(m.networks.map((n) => [n.name, n]));
+  const vols = new Map(m.volumes.map((v) => [v.name, v]));
+  for (const s of m.services) for (const p of s.ports) { p.conflict = false; p.exposed = false; }
+
+  // CFG001
+  for (const s of m.services) if (!s.image && !s.build)
+    add("CFG001", "error", `Service "${s.name}" tidak punya image atau build.`, "Tambahkan image: nama:tag, atau blok build: yang menunjuk ke Dockerfile.", [sk(s.name)], s.line);
+  // CFG002
+  if (m.hasVersion)
+    add("CFG002", "info", 'Field "version" sudah usang dan diabaikan Docker Compose v2.', "Baris version bisa dihapus.", [], m.versionLine);
+  // CFG003
+  for (const s of m.services) if (s.networkMode === "host" && s.ports.length)
+    add("CFG003", "warning", `Port di "${s.name}" diabaikan karena network_mode: host.`, "Dengan network host, container langsung memakai port milik host. Hapus ports, atau ganti mode network.", [sk(s.name)], s.portsLine);
+
+  // PORT001
+  const wild = (ip) => ip === "0.0.0.0" || ip === "::" || ip === "";
+  const maps = [];
+  for (const s of m.services) if (s.networkMode !== "host") for (const p of s.ports) if (p.published) maps.push({ s, p });
+  for (let i = 0; i < maps.length; i++) for (let j = i + 1; j < maps.length; j++) {
+    const a = maps[i], b = maps[j];
+    if (a.p.protocol !== b.p.protocol) continue;
+    if (!(a.p.published.start <= b.p.published.end && b.p.published.start <= a.p.published.end)) continue;
+    if (!(a.p.hostIp === b.p.hostIp || wild(a.p.hostIp) || wild(b.p.hostIp))) continue;
+    const r = { start: Math.max(a.p.published.start, b.p.published.start), end: Math.min(a.p.published.end, b.p.published.end) };
+    a.p.conflict = b.p.conflict = true;
+    const who = a.s === b.s ? `dua kali oleh "${a.s.name}"` : `oleh "${a.s.name}" dan "${b.s.name}"`;
+    add("PORT001", "error", `Port host ${rangeStr(r)}/${a.p.protocol} dipakai ${who}.`, "Hanya satu container yang bisa mengikat port host yang sama. Ganti salah satu port host.", [sk(a.s.name), sk(b.s.name)], b.p.line);
+  }
+
+  // NET001
+  const sn = m.networks.filter((n) => n.declared && !n.external && n.subnets.length);
+  for (let i = 0; i < sn.length; i++) for (let j = i + 1; j < sn.length; j++) {
+    for (const ca of sn[i].subnets) for (const cb of sn[j].subnets) {
+      const ra = cidrRange(ca), rb = cidrRange(cb);
+      if (ra && rb && ra.start <= rb.end && rb.start <= ra.end)
+        add("NET001", "error", `Subnet ${ca} (${sn[i].name}) tumpang tindih dengan ${cb} (${sn[j].name}).`, "Docker akan menolak membuat network kedua. Pilih rentang yang tidak beririsan.", [nk(sn[i].name), nk(sn[j].name)], sn[j].subnetLine);
+    }
+  }
+  // NET002 - NET005
+  const ipSeen = new Map();
+  for (const s of m.services) for (const a of s.networks) {
+    const net = nets.get(a.network);
+    if (net && !net.declared)
+      add("NET002", "error", `Network "${a.network}" dipakai "${s.name}" tapi tidak dideklarasikan.`, `Tambahkan "${a.network}:" di bagian networks paling bawah.`, [sk(s.name), nk(a.network)], a.line);
+    if (!a.ipv4Address || !net) continue;
+    if (!net.subnets.length) {
+      add("NET005", "warning", `"${s.name}" memakai static IP, tapi network "${a.network}" tidak punya subnet eksplisit.`, "Static IP butuh ipam.config.subnet supaya alamatnya pasti berada di rentang network.", [sk(s.name), nk(a.network)], a.ipLine);
+    } else {
+      const ipn = ipToInt(a.ipv4Address);
+      const inside = ipn !== null && net.subnets.some((c) => { const r = cidrRange(c); return r && ipn >= r.start && ipn <= r.end; });
+      if (!inside)
+        add("NET003", "error", `IP ${a.ipv4Address} milik "${s.name}" berada di luar subnet ${net.subnets.join(", ")}.`, "Pilih IP di dalam rentang subnet network tersebut.", [sk(s.name), nk(a.network)], a.ipLine);
+    }
+    const key = a.network + "|" + a.ipv4Address;
+    if (ipSeen.has(key))
+      add("NET004", "error", `IP ${a.ipv4Address} dipakai "${ipSeen.get(key)}" dan "${s.name}" di network "${a.network}".`, "Setiap container butuh IP unik di network yang sama.", [sk(ipSeen.get(key)), sk(s.name)], a.ipLine);
+    else ipSeen.set(key, s.name);
+  }
+
+  // DEP001
+  for (const s of m.services) for (const d of s.dependsOn) if (!byName.has(d.service))
+    add("DEP001", "error", `"${s.name}" bergantung pada "${d.service}", tapi service itu tidak ada.`, "Periksa ejaan nama service di depends_on.", [sk(s.name)], d.line);
+  // DEP002
+  const cycles = findCycles(m);
+  for (const c of cycles)
+    add("DEP002", "error", `Dependensi melingkar: ${[...c, c[0]].join(" → ")}.`, "Compose tidak bisa menentukan urutan start. Putus salah satu depends_on.", c.map(sk), byName.get(c[0]).line);
+  // DEP003
+  for (const s of m.services) for (const d of s.dependsOn) {
+    const t = byName.get(d.service);
+    if (t && d.condition === "service_healthy" && (!t.healthcheck || t.healthcheck.disabled))
+      add("DEP003", "warning", `"${s.name}" menunggu "${t.name}" sehat, tapi "${t.name}" tidak punya healthcheck.`, `Tambahkan healthcheck di "${t.name}", kecuali image-nya sudah punya HEALTHCHECK bawaan.`, [sk(s.name), sk(t.name)], d.line);
+  }
+
+  // VOL001 / VOL002
+  for (const s of m.services) for (const v of s.volumes) if (v.type === "volume" && v.source && !vols.get(v.source).declared)
+    add("VOL001", "error", `Volume "${v.source}" dipakai "${s.name}" tapi tidak dideklarasikan.`, `Tambahkan "${v.source}:" di bagian volumes paling bawah.`, [sk(s.name), vk(v.source)], v.line);
+  for (const v of m.volumes) if (v.declared && !v.used && !v.external)
+    add("VOL002", "info", `Volume "${v.name}" dideklarasikan tapi tidak dipakai service mana pun.`, "Hapus deklarasinya kalau memang tidak diperlukan.", [vk(v.name)], v.line);
+
+  // IMG001
+  for (const s of m.services) if (s.image && s.image.resolved && !s.image.digest && (!s.image.tag || s.image.tag === "latest"))
+    add("IMG001", "warning", `Image "${s.image.raw}" di "${s.name}" ${s.image.tag ? "memakai tag latest" : "tanpa tag"}.`, "Versinya bisa berubah diam-diam saat pull. Tulis versi spesifik, misalnya redis:7.4.", [sk(s.name)], L_img(s));
+
+  // SEC001
+  for (const s of m.services) for (const e of s.env)
+    if (SECRET_RE.test(e.key) && typeof e.value === "string" && e.value !== "" && !e.isInterpolated)
+      add("SEC001", "warning", `${e.key} di "${s.name}" ditulis langsung di file.`, `Pindahkan ke file .env dan tulis ${e.key}: \${${e.key}}.`, [sk(s.name)], e.line);
+  // SEC002
+  for (const s of m.services) if (s.networkMode !== "host") for (const p of s.ports) {
+    if (!p.published || !p.target || !wild(p.hostIp)) continue;
+    for (const [port, db] of Object.entries(DB_PORTS)) {
+      if (+port >= p.target.start && +port <= p.target.end) {
+        p.exposed = true;
+        add("SEC002", "warning", `Port ${db} (${port}) di "${s.name}" terbuka ke semua interface.`, `Kalau hanya untuk akses lokal, tulis "127.0.0.1:${rangeStr(p.published)}:${port}".`, [sk(s.name)], p.line);
+      }
+    }
+  }
+  // VAR001
+  for (const v of m.unresolved)
+    add("VAR001", "info", `Variabel \${${v.name}} belum punya nilai.`, "Tanpa file .env nilainya tidak diketahui. Aturan yang bergantung pada nilai ini dilewati.", [], v.line);
+
+  return out.sort((a, b) => SEV_ORDER[a.severity] - SEV_ORDER[b.severity] || (a.line || 1e9) - (b.line || 1e9));
+}
+function L_img(s) { return state.lineIndex ? state.lineIndex.inService(s.name, "image:") : s.line; }
+
+function findCycles(m) {
+  const byName = new Map(m.services.map((s) => [s.name, s]));
+  const adj = new Map(m.services.map((s) => [s.name, s.dependsOn.map((d) => d.service).filter((n) => byName.has(n))]));
+  const st = new Map(), stack = [], cycles = [], seen = new Set();
+  function dfs(u) {
+    st.set(u, 1); stack.push(u);
+    for (const v of adj.get(u)) {
+      if (st.get(v) === 1) {
+        const c = stack.slice(stack.indexOf(v));
+        const key = [...c].sort().join(",");
+        if (!seen.has(key)) { seen.add(key); cycles.push(c); }
+      } else if (!st.get(v)) dfs(v);
+    }
+    stack.pop(); st.set(u, 2);
+  }
+  for (const s of m.services) if (!st.get(s.name)) dfs(s.name);
+  return cycles;
+}
+
+/* =====================================================================
+   5. Layout diagram
+   ===================================================================== */
+const mctx = document.createElement("canvas").getContext("2d");
+const F = {
+  name: '600 13px "IBM Plex Sans", system-ui, sans-serif',
+  img: '11px "IBM Plex Mono", monospace',
+  port: '10.5px "IBM Plex Mono", monospace',
+  tag: '500 10px "IBM Plex Mono", monospace',
+  net: '600 12px "IBM Plex Sans", system-ui, sans-serif',
+  sub: '10.5px "IBM Plex Mono", monospace',
+  vol: '11px "IBM Plex Mono", monospace',
+};
+const tw = (t, f) => { mctx.font = f; return mctx.measureText(t).width; };
+function clip(t, f, max) {
+  if (tw(t, f) <= max) return t;
+  let s = t;
+  while (s.length > 1 && tw(s + "…", f) > max) s = s.slice(0, -1);
+  return s + "…";
+}
+const SW = 210, COLGAP = 84, ROWGAP = 26;
+
+function layout(m) {
+  const showPorts = state.showPorts, showVols = state.showVols;
+  const byName = new Map(m.services.map((s) => [s.name, s]));
+  const depth = new Map(), visiting = new Set();
+  const d = (n) => {
+    if (depth.has(n)) return depth.get(n);
+    visiting.add(n);
+    let best = 0;
+    for (const dep of byName.get(n).dependsOn) {
+      if (byName.has(dep.service) && !visiting.has(dep.service)) best = Math.max(best, d(dep.service) + 1);
+    }
+    visiting.delete(n);
+    depth.set(n, best);
+    return best;
+  };
+  m.services.forEach((s) => d(s.name));
+  const maxD = Math.max(0, ...depth.values());
+  const cols = Array.from({ length: maxD + 1 }, () => []);
+  const colOf = new Map();
+  m.services.forEach((s) => { const c = maxD - depth.get(s.name); cols[c].push(s); colOf.set(s.name, c); });
+
+  // Urutkan baris dengan barycenter agar garis tidak banyak bersilangan
+  const neigh = new Map(m.services.map((s) => [s.name, new Set()]));
+  for (const s of m.services) for (const dp of s.dependsOn) if (byName.has(dp.service)) { neigh.get(s.name).add(dp.service); neigh.get(dp.service).add(s.name); }
+  const idx = new Map();
+  const reindex = () => cols.forEach((col) => col.forEach((s, i) => idx.set(s.name, i)));
+  reindex();
+  const sweep = (from, to, step) => {
+    for (let c = from; c !== to; c += step) {
+      const ref = c - step;
+      cols[c] = cols[c].map((s, i) => {
+        const ns = [...neigh.get(s.name)].filter((n) => colOf.get(n) === ref);
+        return { s, k: ns.length ? ns.reduce((a, n) => a + idx.get(n), 0) / ns.length : i };
+      }).sort((a, b) => a.k - b.k).map((x) => x.s);
+      reindex();
+    }
+  };
+  for (let it = 0; it < 2; it++) { sweep(1, cols.length, 1); sweep(cols.length - 2, -1, -1); }
+
+  const hOf = (s) => 56 + (showPorts && s.ports.length ? 28 : 0);
+  const colH = cols.map((col) => col.reduce((a, s) => a + hOf(s), 0) + Math.max(0, col.length - 1) * ROWGAP);
+  const maxH = Math.max(...colH, 0);
+  const NET_Y = 0, NET_H = 32, SVC_TOP = NET_Y + NET_H + 90;
+  const pos = new Map();
+  cols.forEach((col, c) => {
+    let y = SVC_TOP + (maxH - colH[c]) / 2;
+    col.forEach((s) => { pos.set(s.name, { x: c * (SW + COLGAP), y, w: SW, h: hOf(s), col: c }); y += hOf(s) + ROWGAP; });
+  });
+  const svcBottom = SVC_TOP + maxH;
+  const contentW = cols.length * SW + (cols.length - 1) * COLGAP;
+
+  // Network: node "hub" di atas
+  const members = new Map(m.networks.map((n) => [n.name, []]));
+  for (const s of m.services) for (const a of s.networks) members.get(a.network).push(s.name);
+  const netNodes = m.networks.map((n, i) => {
+    const sub = n.subnets[0] || (n.external ? "external" : "");
+    const w = tw(n.name, F.net) + (sub ? tw(sub, F.sub) + 12 : 0) + 30;
+    const mem = members.get(n.name);
+    const cx = mem.length ? mem.reduce((a, sn) => a + pos.get(sn).x + SW / 2, 0) / mem.length : contentW + 60;
+    return { n, w, h: NET_H, cx, sub, color: NET_COLORS[i % NET_COLORS.length], members: mem };
+  });
+  spread(netNodes, 18);
+  netNodes.forEach((nn) => { nn.y = NET_Y; });
+
+  // Volume: node silinder di bawah
+  let volNodes = [];
+  if (showVols) {
+    const users = new Map(m.volumes.map((v) => [v.name, []]));
+    for (const s of m.services) for (const v of s.volumes) if (v.type === "volume" && v.source) users.get(v.source).push({ s: s.name, target: v.target });
+    volNodes = m.volumes.map((v) => {
+      const w = Math.max(96, tw(v.name, F.vol) + 32);
+      const us = users.get(v.name);
+      const cx = us.length ? us.reduce((a, u) => a + pos.get(u.s).x + SW / 2, 0) / us.length : contentW + 60;
+      return { v, w, h: 44, cx, users: us };
+    });
+    spread(volNodes, 18);
+    volNodes.forEach((vn) => { vn.y = svcBottom + 80; });
+  }
+
+  const xs = [0, contentW, ...netNodes.map((n) => n.x), ...netNodes.map((n) => n.x + n.w), ...volNodes.map((v) => v.x), ...volNodes.map((v) => v.x + v.w)];
+  const minX = Math.min(...xs), maxX = Math.max(...xs);
+  const bottom = volNodes.length ? svcBottom + 80 + 44 : svcBottom;
+  return { pos, colOf, netNodes, volNodes, bounds: { x: minX - 20, y: NET_Y - 20, w: maxX - minX + 40, h: bottom - NET_Y + 70 } };
+}
+function spread(nodes, gap) {
+  const sorted = [...nodes].sort((a, b) => a.cx - b.cx);
+  let right = -Infinity;
+  for (const n of sorted) { n.x = Math.max(n.cx - n.w / 2, right + gap); right = n.x + n.w; }
+  // geser kembali agar rata tengah terhadap posisi ideal
+  if (sorted.length) {
+    const shift = (sorted.reduce((a, n) => a + n.cx, 0) - sorted.reduce((a, n) => a + n.x + n.w / 2, 0)) / sorted.length;
+    sorted.forEach((n) => { n.x += shift; });
+  }
+}
+
+/* =====================================================================
+   6. Render SVG
+   ===================================================================== */
+const state = {
+  model: null, issues: [], lineIndex: null, layout: null, stale: false,
+  selected: null, focus: null, hoverFocus: null, activeIssue: null,
+  filter: "all", showPorts: true, showVols: true, signature: "",
+  T: { x: 0, y: 0, k: 1 },
+};
+
+function sevOfKey(key) {
+  let best = null;
+  for (const i of state.issues) if (i.keys.includes(key)) if (!best || SEV_ORDER[i.severity] < SEV_ORDER[best]) best = i.severity;
+  return best;
+}
+const countOfKey = (key) => state.issues.filter((i) => i.keys.includes(key)).length;
+
+function bez(x1, y1, cx1, cy1, cx2, cy2, x2, y2) {
+  return { d: `M${x1},${y1} C${cx1},${cy1} ${cx2},${cy2} ${x2},${y2}`, mx: (x1 + 3 * cx1 + 3 * cx2 + x2) / 8, my: (y1 + 3 * cy1 + 3 * cy2 + y2) / 8 };
+}
+
+function render() {
+  const m = state.model, vp = $("#viewport");
+  if (!m || !m.services.length) { vp.innerHTML = ""; $("#empty").hidden = false; state.layout = null; return; }
+  $("#empty").hidden = true;
+  const Lo = layout(m);
+  state.layout = Lo;
+  const { pos, colOf, netNodes, volNodes } = Lo;
+  const netByName = new Map(netNodes.map((n) => [n.n.name, n]));
+  const volByName = new Map(volNodes.map((v) => [v.v.name, v]));
+  const cycleEdges = new Set();
+  for (const c of findCycles(m)) c.forEach((n, i) => cycleEdges.add(n + ">" + c[(i + 1) % c.length]));
+
+  let edges = "", labels = "", nodes = "";
+
+  // Edge network
+  for (const s of m.services) {
+    const p = pos.get(s.name);
+    const atts = s.networks.filter((a) => netByName.has(a.network));
+    atts.forEach((a, k) => {
+      const nn = netByName.get(a.network);
+      const j = nn.members.indexOf(s.name);
+      const x1 = p.x + (SW * (k + 1)) / (atts.length + 1), y1 = p.y;
+      const x2 = nn.x + (nn.w * (j + 1)) / (nn.members.length + 1), y2 = nn.y + nn.h;
+      const b = bez(x1, y1, x1, y1 - 55, x2, y2 + 55, x2, y2);
+      edges += `<path class="edge e-net" data-a="s:${esc(s.name)}" data-b="n:${esc(a.network)}" d="${b.d}" style="stroke:var(${nn.color})"/>`;
+    });
+  }
+  // Edge volume
+  if (state.showVols) for (const s of m.services) {
+    const p = pos.get(s.name);
+    const vs = s.volumes.filter((v) => v.type === "volume" && v.source && volByName.has(v.source));
+    vs.forEach((v, k) => {
+      const vn = volByName.get(v.source);
+      const x1 = p.x + (SW * (k + 1)) / (vs.length + 1), y1 = p.y + p.h;
+      const x2 = vn.x + vn.w / 2, y2 = vn.y;
+      const b = bez(x1, y1, x1, y1 + 45, x2, y2 - 45, x2, y2);
+      edges += `<path class="edge e-vol" data-a="s:${esc(s.name)}" data-b="v:${esc(v.source)}" d="${b.d}"><title>${esc(s.name)} → ${esc(v.target)}</title></path>`;
+    });
+  }
+  // Edge depends_on
+  for (const s of m.services) for (const dp of s.dependsOn) {
+    if (!pos.has(dp.service)) continue;
+    const a = pos.get(s.name), t = pos.get(dp.service);
+    const cyc = cycleEdges.has(s.name + ">" + dp.service);
+    let b;
+    if (colOf.get(dp.service) > colOf.get(s.name)) {
+      const x1 = a.x + SW, y1 = a.y + 24, x2 = t.x - 4, y2 = t.y + 24, dx = Math.max(40, (x2 - x1) / 2);
+      b = bez(x1, y1, x1 + dx, y1, x2 - dx, y2, x2, y2);
+    } else {
+      const x1 = a.x + SW * 0.65, y1 = a.y + a.h, x2 = t.x + SW * 0.35, y2 = t.y + t.h + 4;
+      const drop = 60 + Math.abs(x2 - x1) * 0.15;
+      b = bez(x1, y1, x1, y1 + drop, x2, y2 + drop, x2, y2);
+    }
+    edges += `<path class="edge e-dep${cyc ? " cycle" : ""}" data-a="s:${esc(s.name)}" data-b="s:${esc(dp.service)}" d="${b.d}" marker-end="url(#${cyc ? "arrErr" : "arr"})"><title>${esc(s.name)} bergantung pada ${esc(dp.service)}</title></path>`;
+    const lbl = dp.condition === "service_healthy" ? "healthy" : dp.condition === "service_completed_successfully" ? "selesai" : null;
+    if (lbl) {
+      const w = tw(lbl, F.tag) + 12;
+      labels += `<g class="dep-label" data-a="s:${esc(s.name)}" data-b="s:${esc(dp.service)}" transform="translate(${b.mx - w / 2},${b.my - 9})"><rect width="${w}" height="18" rx="9"/><text x="${w / 2}" y="12.5" text-anchor="middle">${lbl}</text></g>`;
+    }
+  }
+
+  // Node network
+  for (const nn of netNodes) {
+    const n = nn.n;
+    const nameW = tw(n.name, F.net);
+    nodes += `<g class="node net${n.declared ? "" : " undeclared"}" data-key="n:${esc(n.name)}" transform="translate(${nn.x},${nn.y})" tabindex="0" role="button" aria-label="Network ${esc(n.name)}">
+      <title>Network ${esc(n.name)}${n.subnets.length ? " · " + esc(n.subnets.join(", ")) : ""}${n.declared ? "" : " (tidak dideklarasikan)"}</title>
+      <rect class="net-rect" width="${nn.w}" height="${nn.h}" rx="${nn.h / 2}" style="fill:var(${nn.color});fill-opacity:.13;stroke:var(${nn.color})"/>
+      <circle cx="15" cy="${nn.h / 2}" r="4" style="fill:var(${nn.color})"/>
+      <text class="net-name" x="25" y="${nn.h / 2 + 4}">${esc(n.name)}</text>
+      ${nn.sub ? `<text class="net-sub" x="${25 + nameW + 10}" y="${nn.h / 2 + 4}">${esc(nn.sub)}</text>` : ""}
+    </g>`;
+  }
+  // Node volume
+  for (const vn of volNodes) {
+    const v = vn.v, w = vn.w, ry = 6;
+    nodes += `<g class="node vol${v.declared ? "" : " undeclared"}" data-key="v:${esc(v.name)}" transform="translate(${vn.x},${vn.y})" tabindex="0" role="button" aria-label="Volume ${esc(v.name)}">
+      <title>Volume ${esc(v.name)}${v.declared ? "" : " (tidak dideklarasikan)"}</title>
+      <path class="vol-body" d="M0,${ry} a${w / 2},${ry} 0 0,0 ${w},0 v${vn.h - 2 * ry} a${w / 2},${ry} 0 0,1 ${-w},0 z"/>
+      <ellipse class="vol-top" cx="${w / 2}" cy="${ry}" rx="${w / 2}" ry="${ry}"/>
+      <text class="vol-name" x="${w / 2}" y="${vn.h / 2 + 8}" text-anchor="middle">${esc(clip(v.name, F.vol, w - 16))}</text>
+    </g>`;
+  }
+  // Node service
+  for (const s of m.services) {
+    const p = pos.get(s.name), key = "s:" + s.name;
+    const sev = sevOfKey(key), cnt = countOfKey(key);
+    const tags = [];
+    if (s.networkMode === "host") tags.push("host");
+    else if (s.networkMode) tags.push(s.networkMode.split(":")[0]);
+    if (!s.image && s.build) tags.push("build");
+    let tagX = SW - 12, tagSvg = "";
+    if (cnt) {
+      const cw = Math.max(18, tw(String(cnt), F.tag) + 10);
+      tagX -= cw;
+      tagSvg += `<rect class="count-${sev}" x="${tagX}" y="11" width="${cw}" height="18" rx="9"/><text class="count-text" x="${tagX + cw / 2}" y="24" text-anchor="middle">${cnt}</text>`;
+      tagX -= 6;
+    }
+    for (const t of tags) {
+      const w = tw(t, F.tag) + 12;
+      tagX -= w;
+      tagSvg += `<rect class="tag-rect" x="${tagX}" y="11" width="${w}" height="18" rx="4"/><text class="tag-text" x="${tagX + w / 2}" y="23.5" text-anchor="middle">${esc(t)}</text>`;
+      tagX -= 6;
+    }
+    const imgLabel = s.image ? s.image.raw : s.build ? `build: ${s.build.context}` : "tanpa image";
+    let portSvg = "";
+    if (state.showPorts && s.ports.length) {
+      let x = 16;
+      for (let i = 0; i < s.ports.length; i++) {
+        const pt = s.ports[i];
+        const ipPart = pt.hostIp && !["0.0.0.0", "::", ""].includes(pt.hostIp) ? pt.hostIp + ":" : "";
+        let label = `${ipPart}${pt.published ? rangeStr(pt.published) + "→" : pt.unresolved ? "?→" : ""}${rangeStr(pt.target)}${pt.protocol === "udp" ? "/udp" : ""}`;
+        const room = SW - 16 - (s.ports.length > 1 ? 40 : 12);
+        if (i === 0 && tw(label, F.port) + 12 > room) label = clip(label, F.port, room - 12);
+        const w = tw(label, F.port) + 12;
+        const remaining = s.ports.length - i - 1;
+        if (x + w > SW - (remaining ? 40 : 12)) {
+          portSvg += `<g class="port"><rect x="${x}" y="54" width="32" height="20" rx="4"/><text x="${x + 16}" y="68" text-anchor="middle">+${s.ports.length - i}</text></g>`;
+          break;
+        }
+        portSvg += `<g class="port${pt.conflict ? " bad" : pt.exposed ? " risky" : ""}"><rect x="${x}" y="54" width="${w}" height="20" rx="4"/><text x="${x + 6}" y="68">${esc(label)}</text></g>`;
+        x += w + 5;
+      }
+    }
+    nodes += `<g class="node svc" data-key="${esc(key)}" transform="translate(${p.x},${p.y})" tabindex="0" role="button" aria-label="Service ${esc(s.name)}">
+      <title>${esc(s.name)} · ${esc(imgLabel)}</title>
+      <rect class="card" width="${SW}" height="${p.h}" rx="10"/>
+      ${sev ? `<rect class="stripe-${sev}" x="0" y="10" width="3.5" height="${p.h - 20}" rx="1.75"/>` : ""}
+      <text class="svc-name" x="16" y="25">${esc(clip(s.name, F.name, tagX - 22))}</text>
+      ${tagSvg}
+      <text class="svc-img" x="16" y="43">${esc(clip(imgLabel, F.img, SW - 30))}</text>
+      ${portSvg}
+    </g>`;
+  }
+
+  vp.innerHTML = `<g>${edges}</g><g>${labels}</g><g>${nodes}</g>`;
+  vp.querySelectorAll(".net").forEach((el) => {
+    el.addEventListener("mouseenter", () => { state.hoverFocus = neighbors(el.dataset.key); applyFocus(); });
+    el.addEventListener("mouseleave", () => { state.hoverFocus = null; applyFocus(); });
+  });
+  applyFocus();
+
+  const sig = [m.services.map((s) => s.name).join(","), m.networks.map((n) => n.name).join(","), m.volumes.map((v) => v.name).join(","), state.showPorts, state.showVols].join("|");
+  if (sig !== state.signature) { state.signature = sig; fitView(); }
+}
+
+function neighbors(key) {
+  const m = state.model, set = new Set([key]);
+  if (!m) return set;
+  const [kind, name] = [key.slice(0, 1), key.slice(2)];
+  if (kind === "s") {
+    const s = m.services.find((x) => x.name === name);
+    if (!s) return set;
+    s.dependsOn.forEach((d) => set.add("s:" + d.service));
+    m.services.forEach((o) => { if (o.dependsOn.some((d) => d.service === name)) set.add("s:" + o.name); });
+    s.networks.forEach((a) => set.add("n:" + a.network));
+    s.volumes.forEach((v) => { if (v.type === "volume" && v.source) set.add("v:" + v.source); });
+  } else if (kind === "n") {
+    m.services.forEach((s) => { if (s.networks.some((a) => a.network === name)) set.add("s:" + s.name); });
+  } else if (kind === "v") {
+    m.services.forEach((s) => { if (s.volumes.some((v) => v.source === name && v.type === "volume")) set.add("s:" + s.name); });
+  }
+  return set;
+}
+
+function applyFocus() {
+  const f = state.hoverFocus || state.focus, sel = state.selected;
+  document.querySelectorAll("#viewport [data-key]").forEach((el) => {
+    el.classList.toggle("dim", !!f && !f.has(el.dataset.key));
+    el.classList.toggle("sel", el.dataset.key === sel);
+  });
+  document.querySelectorAll("#viewport [data-a]").forEach((el) => {
+    const a = el.dataset.a, b = el.dataset.b;
+    el.classList.toggle("dim", !!f && !(f.has(a) && f.has(b)));
+    const hot = !!sel && (a === sel || b === sel);
+    el.classList.toggle("hot", hot);
+    if (el.classList.contains("e-dep") && !el.classList.contains("cycle")) el.setAttribute("marker-end", hot ? "url(#arrHot)" : "url(#arr)");
+  });
+}
+
+/* ---------- pan & zoom ---------- */
+const svg = $("#svg");
+function applyT() { $("#viewport").setAttribute("transform", `translate(${state.T.x},${state.T.y}) scale(${state.T.k})`); }
+function fitView() {
+  if (!state.layout) return;
+  const r = svg.getBoundingClientRect(), b = state.layout.bounds;
+  if (!r.width || !r.height) return;
+  const k = Math.min((r.width - 40) / b.w, (r.height - 70) / b.h, 1.15);
+  state.T = { k, x: (r.width - b.w * k) / 2 - b.x * k, y: (r.height - 40 - b.h * k) / 2 - b.y * k };
+  applyT();
+}
+function zoomAt(px, py, factor) {
+  const T = state.T, k2 = Math.min(2.5, Math.max(0.25, T.k * factor));
+  T.x = px - ((px - T.x) * k2) / T.k; T.y = py - ((py - T.y) * k2) / T.k; T.k = k2;
+  applyT();
+}
+svg.addEventListener("wheel", (e) => {
+  e.preventDefault();
+  const r = svg.getBoundingClientRect();
+  zoomAt(e.clientX - r.left, e.clientY - r.top, Math.exp(-e.deltaY * 0.0015));
+}, { passive: false });
+let drag = null;
+svg.addEventListener("pointerdown", (e) => {
+  drag = { x: e.clientX, y: e.clientY, tx: state.T.x, ty: state.T.y, moved: false, target: e.target };
+  svg.setPointerCapture(e.pointerId);
+});
+svg.addEventListener("pointermove", (e) => {
+  if (!drag) return;
+  const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+  if (!drag.moved && Math.hypot(dx, dy) > 4) { drag.moved = true; svg.classList.add("panning"); }
+  if (drag.moved) { state.T.x = drag.tx + dx; state.T.y = drag.ty + dy; applyT(); }
+});
+svg.addEventListener("pointerup", () => {
+  if (drag && !drag.moved) {
+    const el = drag.target.closest ? drag.target.closest("[data-key]") : null;
+    if (el) selectKey(el.dataset.key, true); else clearSelection();
+  }
+  drag = null; svg.classList.remove("panning");
+});
+svg.addEventListener("keydown", (e) => {
+  const el = e.target.closest && e.target.closest("[data-key]");
+  if (el && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); selectKey(el.dataset.key, true); }
+});
+$("#zIn").onclick = () => { const r = svg.getBoundingClientRect(); zoomAt(r.width / 2, r.height / 2, 1.2); };
+$("#zOut").onclick = () => { const r = svg.getBoundingClientRect(); zoomAt(r.width / 2, r.height / 2, 1 / 1.2); };
+$("#zFit").onclick = fitView;
+new ResizeObserver(() => fitView()).observe(svg);
+
+function selectKey(key, withFocus) {
+  state.selected = key;
+  state.focus = withFocus ? neighbors(key) : null;
+  state.activeIssue = null;
+  applyFocus(); renderDetail(); renderIssues();
+}
+function clearSelection() {
+  state.selected = null; state.focus = null; state.activeIssue = null;
+  applyFocus(); renderDetail(); renderIssues();
+}
+
+/* =====================================================================
+   7. Panel detail
+   ===================================================================== */
+function netColor(name) {
+  const nn = state.layout && state.layout.netNodes.find((n) => n.n.name === name);
+  return nn ? `var(${nn.color})` : "var(--muted)";
+}
+function issueRows(key) {
+  const list = state.issues.map((i, idx) => ({ i, idx })).filter(({ i }) => i.keys.includes(key));
+  if (!list.length) return "";
+  return `<section><h3>Masalah</h3><div class="rows">${list.map(({ i, idx }) =>
+    `<button class="row" data-issue="${idx}"><span class="sev sev-${i.severity}">${SEV_ICON[i.severity]}</span><span>${esc(i.message)}</span></button>`).join("")}</div></section>`;
+}
+const gotoBtn = (line) => (line ? `<button class="goto" data-goto="${line}">Lihat di editor, baris ${line} →</button>` : "");
+
+function renderDetail() {
+  const el = $("#detail"), m = state.model, key = state.selected;
+  if (!m) { el.innerHTML = ""; return; }
+  if (!key) {
+    const counts = { error: 0, warning: 0, info: 0 };
+    state.issues.forEach((i) => counts[i.severity]++);
+    el.innerHTML = `<div class="overview">
+      <div class="d-kind">Proyek</div>
+      <h2>${esc(m.project || "Tanpa nama")}</h2>
+      <div class="d-sub">${m.services.length} service · ${m.networks.length} network · ${m.volumes.length} volume</div>
+      <section><h3>Ringkasan pemeriksaan</h3><div class="rows">
+        <div class="row"><span class="sev sev-error">${SEV_ICON.error}</span>Error<span class="r-right">${counts.error}</span></div>
+        <div class="row"><span class="sev sev-warning">${SEV_ICON.warning}</span>Warning<span class="r-right">${counts.warning}</span></div>
+        <div class="row"><span class="sev sev-info">${SEV_ICON.info}</span>Info<span class="r-right">${counts.info}</span></div>
+      </div></section>
+      <section><h3>Cara membaca</h3>
+        <p>Service tersusun dari kiri ke kanan mengikuti depends_on: service di kiri menunggu service di kanannya.</p>
+        <p>Network ada di baris atas, named volume di baris bawah. Klik node mana saja untuk melihat detail dan hubungannya.</p>
+      </section></div>`;
+    return;
+  }
+  const [kind, name] = [key.slice(0, 1), key.slice(2)];
+  if (kind === "s") {
+    const s = m.services.find((x) => x.name === name);
+    if (!s) { el.innerHTML = ""; return; }
+    const dependents = m.services.filter((o) => o.dependsOn.some((d) => d.service === name));
+    const condLbl = { service_started: "started", service_healthy: "healthy", service_completed_successfully: "selesai" };
+    el.innerHTML = `
+      <div class="d-kind">Service</div>
+      <h2>${esc(s.name)}</h2>
+      <div class="d-sub mono">${esc(s.image ? s.image.raw : s.build ? `build: ${s.build.context}${s.build.dockerfile ? " · " + s.build.dockerfile : ""}` : "tanpa image")}</div>
+      ${issueRows(key)}
+      <section><h3>Port</h3>${s.ports.length ? `<div class="rows">${s.ports.map((p) => `<div class="row"><span class="mono">${esc(p.hostIp)}:${p.published ? rangeStr(p.published) : p.unresolved ? "?" : "acak"} → ${rangeStr(p.target)}</span><span class="r-right">${p.protocol}</span></div>`).join("")}</div>` : `<div class="none">${s.networkMode === "host" ? "Memakai network host" : "Tidak dipublish ke host"}</div>`}</section>
+      <section><h3>Network</h3>${s.networkMode ? `<div class="row"><span class="mono">network_mode: ${esc(s.networkMode)}</span></div>` : `<div class="rows">${s.networks.map((a) => `<button class="row" data-select="n:${esc(a.network)}"><span class="dot" style="background:${netColor(a.network)}"></span><span>${esc(a.network)}${a.implicit ? ' <span class="r-muted">(implisit)</span>' : ""}</span><span class="r-right mono">${esc(a.ipv4Address || (a.aliases.length ? "alias: " + a.aliases.join(", ") : ""))}</span></button>`).join("")}</div>`}</section>
+      <section><h3>Volume &amp; bind mount</h3>${s.volumes.length ? `<div class="rows">${s.volumes.map((v) => {
+        const inner = `<span class="r-muted">${v.type}</span><span class="mono">${esc(v.source || "(anonim)")} → ${esc(v.target)}</span>${v.readOnly ? '<span class="r-right">ro</span>' : ""}`;
+        return v.type === "volume" && v.source ? `<button class="row" data-select="v:${esc(v.source)}">${inner}</button>` : `<div class="row">${inner}</div>`;
+      }).join("")}</div>` : '<div class="none">Tidak ada</div>'}</section>
+      <section><h3>Bergantung pada</h3>${s.dependsOn.length ? `<div class="rows">${s.dependsOn.map((d) => `<button class="row" data-select="s:${esc(d.service)}"><span>${esc(d.service)}</span><span class="r-right">${condLbl[d.condition] || esc(d.condition)}</span></button>`).join("")}</div>` : '<div class="none">Tidak ada</div>'}</section>
+      <section><h3>Ditunggu oleh</h3>${dependents.length ? `<div class="rows">${dependents.map((o) => `<button class="row" data-select="s:${esc(o.name)}">${esc(o.name)}</button>`).join("")}</div>` : '<div class="none">Tidak ada</div>'}</section>
+      <section><h3>Environment</h3>${s.env.length ? `<div class="rows">${s.env.map((e) => {
+        const secret = SECRET_RE.test(e.key) && e.value && !e.isInterpolated;
+        const v = e.value === undefined ? '<span class="r-muted">(dari shell)</span>' : secret ? "••••••" : esc(e.value);
+        return `<div class="row"><span class="mono">${esc(e.key)}</span><span class="r-right mono" style="max-width:55%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${v}</span></div>`;
+      }).join("")}</div>` : '<div class="none">Tidak ada</div>'}</section>
+      <section><h3>Healthcheck</h3>${s.healthcheck && !s.healthcheck.disabled ? `<div class="row"><span class="mono">${esc(s.healthcheck.test)}</span></div>` : '<div class="none">Tidak ada</div>'}</section>
+      ${gotoBtn(s.line)}`;
+  } else if (kind === "n") {
+    const n = m.networks.find((x) => x.name === name);
+    if (!n) { el.innerHTML = ""; return; }
+    const mem = m.services.filter((s) => s.networks.some((a) => a.network === name));
+    el.innerHTML = `
+      <div class="d-kind">Network</div>
+      <h2><span class="dot" style="background:${netColor(name)};width:10px;height:10px"></span> ${esc(n.name)}</h2>
+      <div class="d-sub">${n.implicit ? "Dibuat otomatis oleh Compose" : n.declared ? (n.external ? "External, dibuat di luar file ini" : `Driver ${esc(n.driver || "bridge")}`) : "Tidak dideklarasikan"}</div>
+      ${issueRows(key)}
+      <section><h3>Subnet</h3>${n.subnets.length ? `<div class="rows">${n.subnets.map((c) => `<div class="row"><span class="mono">${esc(c)}</span></div>`).join("")}</div>` : '<div class="none">Dipilih otomatis oleh Docker</div>'}</section>
+      <section><h3>Anggota</h3>${mem.length ? `<div class="rows">${mem.map((s) => { const a = s.networks.find((x) => x.network === name); return `<button class="row" data-select="s:${esc(s.name)}"><span>${esc(s.name)}</span><span class="r-right mono">${esc(a.ipv4Address || "")}</span></button>`; }).join("")}</div>` : '<div class="none">Tidak ada</div>'}</section>
+      ${gotoBtn(n.line)}`;
+  } else if (kind === "v") {
+    const v = m.volumes.find((x) => x.name === name);
+    if (!v) { el.innerHTML = ""; return; }
+    const users = [];
+    m.services.forEach((s) => s.volumes.forEach((mt) => { if (mt.type === "volume" && mt.source === name) users.push({ s: s.name, mt }); }));
+    el.innerHTML = `
+      <div class="d-kind">Named volume</div>
+      <h2>${esc(v.name)}</h2>
+      <div class="d-sub">${v.declared ? (v.external ? "External" : `Driver ${esc(v.driver || "local")}`) : "Tidak dideklarasikan"}</div>
+      ${issueRows(key)}
+      <section><h3>Dipakai oleh</h3>${users.length ? `<div class="rows">${users.map((u) => `<button class="row" data-select="s:${esc(u.s)}"><span>${esc(u.s)}</span><span class="r-right mono">${esc(u.mt.target)}${u.mt.readOnly ? " (ro)" : ""}</span></button>`).join("")}</div>` : '<div class="none">Tidak ada</div>'}</section>
+      ${gotoBtn(v.line)}`;
+  }
+}
+$("#detail").addEventListener("click", (e) => {
+  const sel = e.target.closest("[data-select]"), g = e.target.closest("[data-goto]"), iss = e.target.closest("[data-issue]");
+  if (sel) selectKey(sel.dataset.select, true);
+  else if (g) gotoLine(+g.dataset.goto);
+  else if (iss) activateIssue(+iss.dataset.issue);
+});
+
+/* =====================================================================
+   8. Daftar masalah
+   ===================================================================== */
+function renderIssues() {
+  const counts = { error: 0, warning: 0, info: 0 };
+  state.issues.forEach((i) => counts[i.severity]++);
+  const btn = (id, label, n) => `<button data-filter="${id}" aria-pressed="${state.filter === id}">${id !== "all" ? `<span class="sev-${id}">${SEV_ICON[id]}</span>` : ""}${label} <b>${n}</b></button>`;
+  $("#filters").innerHTML = btn("all", "Semua", state.issues.length) + btn("error", "Error", counts.error) + btn("warning", "Warning", counts.warning) + btn("info", "Info", counts.info);
+  const list = state.issues.map((i, idx) => ({ i, idx })).filter(({ i }) => state.filter === "all" || i.severity === state.filter);
+  if (!state.issues.length) {
+    $("#issues").innerHTML = `<li class="all-clear">Tidak ada masalah yang terdeteksi. File ini siap dijalankan.</li>`;
+  } else if (!list.length) {
+    $("#issues").innerHTML = `<li class="all-clear" style="color:var(--muted)">Tidak ada masalah dengan tingkat ini.</li>`;
+  } else {
+    $("#issues").innerHTML = list.map(({ i, idx }) => `<li><button data-issue="${idx}" class="${state.activeIssue === idx ? "active" : ""}">
+      <span class="sev sev-${i.severity}" aria-label="${i.severity}">${SEV_ICON[i.severity]}</span>
+      <span class="rule">${i.ruleId}</span>
+      <span class="msg">${esc(i.message)}${i.hint ? `<span class="hint">${esc(i.hint)}</span>` : ""}</span>
+      <span class="ln">${i.line ? "baris " + i.line : ""}</span>
+    </button></li>`).join("");
+  }
+  // penanda di gutter
+  const marks = {};
+  for (const i of state.issues) if (i.line && (!marks[i.line] || SEV_ORDER[i.severity] < SEV_ORDER[marks[i.line]])) marks[i.line] = i.severity;
+  $("#gutterInner").querySelectorAll("div").forEach((d, k) => { d.className = marks[k + 1] ? "m-" + marks[k + 1] : ""; });
+}
+$("#filters").addEventListener("click", (e) => { const b = e.target.closest("[data-filter]"); if (b) { state.filter = b.dataset.filter; renderIssues(); } });
+$("#issues").addEventListener("click", (e) => { const b = e.target.closest("[data-issue]"); if (b) activateIssue(+b.dataset.issue); });
+
+function activateIssue(idx) {
+  const i = state.issues[idx];
+  if (!i) return;
+  state.activeIssue = idx;
+  state.focus = i.keys.length ? new Set(i.keys) : null;
+  state.selected = i.keys.find((k) => k.startsWith("s:")) || i.keys[0] || null;
+  applyFocus(); renderDetail(); renderIssues();
+  if (i.line) gotoLine(i.line, false);
+}
+
+/* =====================================================================
+   9. Editor
+   ===================================================================== */
+const src = $("#src"), hl = $("#hl"), gutter = $("#gutterInner"), hlLine = $("#hlLine");
+const LH = 20, PAD = 12;
+let flashLine = null;
+
+function highlightLine(line) {
+  let code = line, comment = "", q = null;
+  for (let i = 0; i < line.length; i++) {
+    const c = line[i];
+    if (q) { if (c === q) q = null; continue; }
+    if (c === '"' || c === "'") { q = c; continue; }
+    if (c === "#" && (i === 0 || /\s/.test(line[i - 1]))) { code = line.slice(0, i); comment = line.slice(i); break; }
+  }
+  const dash = (s) => esc(s).replace("-", '<span class="t-dash">-</span>');
+  let out;
+  const m = /^(\s*(?:-\s+)?)([^\s#'"\-][^:#]*?|"[^"]*"|'[^']*')(:)(?=\s|$)(.*)$/.exec(code);
+  if (m) out = dash(m[1]) + `<span class="t-key">${esc(m[2])}</span>:` + val(m[4]);
+  else { const d = /^(\s*-\s*)(.*)$/.exec(code); out = d ? dash(d[1]) + val(d[2]) : val(code); }
+  if (comment) out += `<span class="t-com">${esc(comment)}</span>`;
+  return out;
+}
+function val(v) {
+  if (!v.trim()) return esc(v);
+  const lead = v.match(/^\s*/)[0], body = v.slice(lead.length), t = body.trim();
+  const cls = /^["']/.test(body) ? "t-str" : /^-?\d+(\.\d+)?$/.test(t) || /^(true|false|null|yes|no|~)$/i.test(t) ? "t-num" : "";
+  const html = esc(body).replace(/\$\{[^}]*\}|\$[A-Za-z_][A-Za-z0-9_]*/g, (x) => `<span class="t-var">${x}</span>`);
+  return esc(lead) + (cls ? `<span class="${cls}">${html}</span>` : html);
+}
+function paintEditor() {
+  const lines = src.value.split("\n");
+  hl.innerHTML = lines.map(highlightLine).join("\n") + "\n ";
+  if (gutter.children.length !== lines.length) gutter.innerHTML = lines.map((_, i) => `<div>${i + 1}</div>`).join("");
+  syncScroll();
+}
+function syncScroll() {
+  hl.scrollTop = src.scrollTop; hl.scrollLeft = src.scrollLeft;
+  gutter.style.transform = `translateY(${-src.scrollTop}px)`;
+  if (flashLine) { hlLine.style.display = "block"; hlLine.style.top = `${PAD + (flashLine - 1) * LH - src.scrollTop}px`; }
+  else hlLine.style.display = "none";
+}
+function gotoLine(n, focusEditor = true) {
+  const lines = src.value.split("\n");
+  if (n < 1 || n > lines.length) return;
+  let off = 0;
+  for (let i = 0; i < n - 1; i++) off += lines[i].length + 1;
+  if (focusEditor) { src.focus({ preventScroll: true }); src.setSelectionRange(off, off + lines[n - 1].length); }
+  const target = (n - 1) * LH - src.clientHeight / 3;
+  src.scrollTop = Math.max(0, target);
+  flashLine = n; syncScroll();
+}
+src.addEventListener("scroll", syncScroll);
+let timer = null;
+src.addEventListener("input", () => {
+  flashLine = null;
+  paintEditor();
+  clearTimeout(timer);
+  timer = setTimeout(analyze, 280);
+});
+src.addEventListener("keydown", (e) => {
+  if (e.key === "Tab") {
+    e.preventDefault();
+    const s = src.selectionStart;
+    src.setRangeText("  ", s, src.selectionEnd, "end");
+    src.dispatchEvent(new Event("input"));
+  }
+});
+
+/* =====================================================================
+   10. Pipeline utama
+   ===================================================================== */
+function analyze() {
+  const text = src.value;
+  let doc;
+  try {
+    doc = jsyaml.load(text);
+  } catch (e) {
+    const line = e.mark ? e.mark.line + 1 : null;
+    state.issues = [{ ruleId: "YAML", severity: "error", message: `YAML tidak valid: ${e.reason || e.message}.`, hint: "Periksa indentasi dan tanda titik dua di sekitar baris ini.", keys: [], line }];
+    state.stale = !!state.model;
+    $("#staleBanner").hidden = !state.stale;
+    $("#staleBanner").textContent = `YAML tidak valid${line ? " di baris " + line : ""}. Diagram menampilkan versi terakhir yang valid.`;
+    setParseState(false);
+    renderIssues();
+    return;
+  }
+  $("#staleBanner").hidden = true;
+  state.stale = false;
+  if (!doc || typeof doc !== "object" || Array.isArray(doc)) doc = {};
+  state.lineIndex = buildLineIndex(text);
+  state.model = normalize(doc, text);
+  state.issues = runRules(state.model);
+  if (!doc.services) state.issues.unshift({ ruleId: "CFG000", severity: "info", message: "File belum punya bagian services.", hint: "Tambahkan services: lalu definisikan minimal satu service.", keys: [], line: null });
+  if (state.selected && !keyExists(state.selected)) state.selected = null;
+  if (state.focus) state.focus = null;
+  state.activeIssue = null;
+  setParseState(true);
+  render(); renderDetail(); renderIssues(); renderStats();
+}
+function keyExists(key) {
+  const m = state.model, n = key.slice(2);
+  return key[0] === "s" ? m.services.some((s) => s.name === n) : key[0] === "n" ? m.networks.some((x) => x.name === n) : m.volumes.some((v) => v.name === n);
+}
+function setParseState(ok) {
+  const el = $("#parseState");
+  el.innerHTML = ok ? `<span class="status-ok">●</span> YAML valid` : `<span class="status-bad">●</span> YAML tidak valid`;
+}
+function renderStats() {
+  const m = state.model;
+  $("#stats").innerHTML = m ? `<span class="chip"><b>${m.services.length}</b> service</span><span class="chip"><b>${m.networks.length}</b> network</span><span class="chip"><b>${m.volumes.length}</b> volume</span>` : "";
+}
+
+function loadText(text, initialSelect) {
+  src.value = text.replace(/\r\n/g, "\n");
+  src.scrollTop = 0; flashLine = null;
+  state.selected = null; state.focus = null; state.signature = "";
+  paintEditor();
+  analyze();
+  if (initialSelect && state.model && state.model.services.length) {
+    // Pilih service dengan masalah terbanyak agar panel detail langsung berisi
+    let best = null, bestN = 0;
+    for (const s of state.model.services) { const n = countOfKey("s:" + s.name); if (n > bestN) { best = s.name; bestN = n; } }
+    if (best) { state.selected = "s:" + best; applyFocus(); renderDetail(); }
+  }
+}
+function loadExample(id) { loadText($("#ex-" + id).textContent.replace(/^\n/, ""), true); }
+
+$("#example").addEventListener("change", (e) => { if (e.target.value !== "custom") loadExample(e.target.value); });
+$("#file").addEventListener("change", (e) => {
+  const f = e.target.files[0];
+  if (f) openFile(f);
+  e.target.value = "";
+});
+$("#canvas").addEventListener("dragover", (e) => e.preventDefault());
+$("#canvas").addEventListener("drop", (e) => {
+  e.preventDefault();
+  const f = e.dataTransfer.files[0];
+  if (f) openFile(f);
+});
+function openFile(f) {
+  f.text().then((t) => {
+    const opt = $("#example").querySelector('[value="custom"]');
+    opt.hidden = false; opt.textContent = f.name; $("#example").value = "custom";
+    loadText(t, false);
+  });
+}
+$("#tPorts").addEventListener("change", (e) => { state.showPorts = e.target.checked; render(); });
+$("#tVols").addEventListener("change", (e) => { state.showVols = e.target.checked; render(); });
+
+loadExample("laravel");
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { state.signature = ""; render(); });
+</script>
+</body>
+</html>
