@@ -1,0 +1,82 @@
+# Stack Laravel lengkap: anchor + merge key, variabel dengan default, healthcheck.
+name: laravel-shop
+
+x-app: &app
+  build:
+    context: .
+    dockerfile: docker/php/Dockerfile
+  env_file: .env
+  environment:
+    APP_ENV: ${APP_ENV:-production}
+    DB_HOST: mysql
+    DB_PASSWORD: ${DB_PASSWORD}
+    REDIS_HOST: redis
+  volumes:
+    - ./:/var/www/html
+    - ./storage:/var/www/html/storage:rw
+  networks: [backend]
+
+services:
+  nginx:
+    image: nginx:1.27-alpine
+    ports:
+      - "${HTTP_PORT:-80}:80"
+      - "443:443"
+    volumes:
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./:/var/www/html:ro
+    depends_on:
+      - app
+    networks:
+      - frontend
+      - backend
+
+  app:
+    <<: *app
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+  queue:
+    <<: *app
+    command: php artisan queue:work
+    depends_on: [app]
+
+  scheduler:
+    <<: *app
+    command: php artisan schedule:work
+    profiles: [cron]
+
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: laravel
+      MYSQL_ROOT_PASSWORD: secret
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      retries: 10
+    networks:
+      backend:
+        aliases: [db]
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "127.0.0.1:6379:6379"
+    volumes:
+      - redis-data:/data
+    networks: [backend]
+
+networks:
+  frontend:
+  backend:
+    driver: bridge
+
+volumes:
+  mysql-data:
+  redis-data:

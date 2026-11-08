@@ -1,11 +1,8 @@
-<script setup lang="ts"></script>
-
 <template>
-  <h1>You did it!</h1>
-  <p>
-    Visit <a href="https://vuejs.org/" target="_blank" rel="noopener">vuejs.org</a> to read the
-    documentation
-  </p>
+  <main class="grid min-h-screen place-items-center bg-slate-50 text-slate-900">
+    <div class="text-center">
+      <h1 class="text-2xl font-semibold">ComposeMapView</h1>
+      <p class="mt-2 text-slate-500">Visualizer &amp; linter docker-compose. Segera hadir.</p>
+    </div>
+  </main>
 </template>
-
-<style scoped></style>

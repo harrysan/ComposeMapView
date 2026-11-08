@@ -1,0 +1,3495 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`fixtures > ac-elasticsearch-logstash-kibana.yml dinormalisasi tanpa error 1`] = `
+{
+  "hasVersionField": false,
+  "networks": [
+    {
+      "declared": true,
+      "driver": "bridge",
+      "external": false,
+      "isDefault": false,
+      "name": "elastic",
+      "source": {
+        "endLine": 48,
+        "startLine": 47,
+      },
+      "subnets": [],
+    },
+  ],
+  "services": [
+    {
+      "dependsOn": [],
+      "envFiles": [],
+      "environment": [
+        {
+          "isInterpolated": false,
+          "key": "discovery.type",
+          "source": {
+            "endLine": 6,
+            "startLine": 6,
+          },
+          "value": "single-node",
+        },
+        {
+          "isInterpolated": false,
+          "key": "ES_JAVA_OPTS",
+          "source": {
+            "endLine": 7,
+            "startLine": 7,
+          },
+          "value": "-Xms512m -Xmx512m",
+        },
+      ],
+      "healthcheck": {
+        "disabled": false,
+        "test": "curl --silent --fail localhost:9200/_cluster/health || exit 1",
+      },
+      "image": {
+        "name": "elasticsearch",
+        "raw": "elasticsearch:7.16.1",
+        "tag": "7.16.1",
+      },
+      "name": "elasticsearch",
+      "networks": [
+        {
+          "aliases": [],
+          "network": "elastic",
+          "source": {
+            "endLine": 17,
+            "startLine": 17,
+          },
+        },
+      ],
+      "ports": [
+        {
+          "hostIp": "0.0.0.0",
+          "protocol": "tcp",
+          "published": {
+            "end": 9200,
+            "start": 9200,
+          },
+          "raw": "9200:9200",
+          "source": {
+            "endLine": 9,
+            "startLine": 9,
+          },
+          "target": {
+            "end": 9200,
+            "start": 9200,
+          },
+          "unresolved": false,
+        },
+        {
+          "hostIp": "0.0.0.0",
+          "protocol": "tcp",
+          "published": {
+            "end": 9300,
+            "start": 9300,
+          },
+          "raw": "9300:9300",
+          "source": {
+            "endLine": 10,
+            "startLine": 10,
+          },
+          "target": {
+            "end": 9300,
+            "start": 9300,
+          },
+          "unresolved": false,
+        },
+      ],
+      "profiles": [],
+      "source": {
+        "endLine": 17,
+        "startLine": 2,
+      },
+      "volumes": [],
+    },
+    {
+      "dependsOn": [
+        {
+          "condition": "service_started",
+          "service": "elasticsearch",
+          "source": {
+            "endLine": 33,
+            "startLine": 33,
+          },
+        },
+      ],
+      "envFiles": [],
+      "environment": [
+        {
+          "isInterpolated": false,
+          "key": "discovery.seed_hosts",
+          "source": {
+            "endLine": 22,
+            "startLine": 22,
+          },
+          "value": "logstash",
+        },
+        {
+          "isInterpolated": false,
+          "key": "LS_JAVA_OPTS",
+          "source": {
+            "endLine": 23,
+            "startLine": 23,
+          },
+          "value": "-Xms512m -Xmx512m",
+        },
+      ],
+      "image": {
+        "name": "logstash",
+        "raw": "logstash:7.16.1",
+        "tag": "7.16.1",
+      },
+      "name": "logstash",
+      "networks": [
+        {
+          "aliases": [],
+          "network": "elastic",
+          "source": {
+            "endLine": 35,
+            "startLine": 35,
+          },
+        },
+      ],
+      "ports": [
+        {
+          "hostIp": "0.0.0.0",
+          "protocol": "tcp",
+          "published": {
+            "end": 5000,
+            "start": 5000,
+          },
+          "raw": "5000:5000/tcp",
+          "source": {
+            "endLine": 28,
+            "startLine": 28,
+          },
+          "target": {
+            "end": 5000,
+            "start": 5000,
+          },
+          "unresolved": false,
+        },
+        {
+          "hostIp": "0.0.0.0",
+          "protocol": "udp",
+          "published": {
+            "end": 5000,
+            "start": 5000,
+          },
+          "raw": "5000:5000/udp",
+          "source": {
+            "endLine": 29,
+            "startLine": 29,
+          },
+          "target": {
+            "end": 5000,
+            "start": 5000,
+          },
+          "unresolved": false,
+        },
+        {
+          "hostIp": "0.0.0.0",
+          "protocol": "tcp",
+          "published": {
+            "end": 5044,
+            "start": 5044,
+          },
+          "raw": "5044:5044",
+          "source": {
+            "endLine": 30,
+            "startLine": 30,
+          },
+          "target": {
+            "end": 5044,
+            "start": 5044,
+          },
+          "unresolved": false,
+        },
+        {
+          "hostIp": "0.0.0.0",
+          "protocol": "tcp",
+          "published": {
+            "end": 9600,
+            "start": 9600,
+          },
+          "raw": "9600:9600",
+          "source": {
+            "endLine": 31,
+            "startLine": 31,
+          },
+          "target": {
+            "end": 9600,
+            "start": 9600,
+          },
+          "unresolved": false,
+        },
+      ],
+      "profiles": [],
+      "source": {
+        "endLine": 36,
+        "startLine": 18,
+      },
+      "volumes": [
+        {
+          "raw": "./logstash/pipeline/logstash-nginx.config:/usr/share/logstash/pipeline/logstash-nginx.config",
+          "readOnly": false,
+          "source": "./logstash/pipeline/logstash-nginx.config",
+          "sourceRange": {
+            "endLine": 25,
+            "startLine": 25,
+          },
+          "target": "/usr/share/logstash/pipeline/logstash-nginx.config",
+          "type": "bind",
+        },
+        {
+          "raw": "./logstash/nginx.log:/home/nginx.log",
+          "readOnly": false,
+          "source": "./logstash/nginx.log",
+          "sourceRange": {
+            "endLine": 26,
+            "startLine": 26,
+          },
+          "target": "/home/nginx.log",
+          "type": "bind",
+        },
+      ],
+    },
+    {
+      "dependsOn": [
+        {
+          "condition": "service_started",
+          "service": "elasticsearch",
+          "source": {
+            "endLine": 43,
+            "startLine": 43,
+          },
+        },
+      ],
+      "envFiles": [],
+      "environment": [],
+      "image": {
+        "name": "kibana",
+        "raw": "kibana:7.16.1",
+        "tag": "7.16.1",
+      },
+      "name": "kibana",
+      "networks": [
+        {
+          "aliases": [],
+          "network": "elastic",
+          "source": {
+            "endLine": 45,
+            "startLine": 45,
+          },
+        },
+      ],
+      "ports": [
+        {
+          "hostIp": "0.0.0.0",
+          "protocol": "tcp",
+          "published": {
+            "end": 5601,
+            "start": 5601,
+          },
+          "raw": "5601:5601",
+          "source": {
+            "endLine": 41,
+            "startLine": 41,
+          },
+          "target": {
+            "end": 5601,
+            "start": 5601,
+          },
+          "unresolved": false,
+        },
+      ],
+      "profiles": [],
+      "source": {
+        "endLine": 45,
+        "startLine": 37,
+      },
+      "volumes": [],
+    },
+  ],
+  "unresolvedVars": [],
+  "volumes": [],
+}
+`;
+
+exports[`fixtures > ac-gitea-postgres.yml dinormalisasi tanpa error 1`] = `
+{
+  "hasVersionField": false,
+  "networks": [
+    {
+      "declared": false,
+      "external": false,
+      "isDefault": true,
+      "name": "default",
+      "subnets": [],
+    },
+  ],
+  "services": [
+    {
+      "dependsOn": [],
+      "envFiles": [],
+      "environment": [
+        {
+          "isInterpolated": false,
+          "key": "DB_TYPE",
+          "source": {
+            "endLine": 5,
+            "startLine": 5,
+          },
+          "value": "postgres",
+        },
+        {
+          "isInterpolated": false,
+          "key": "DB_HOST",
+          "source": {
+            "endLine": 6,
+            "startLine": 6,
+          },
+          "value": "db:5432",
+        },
+        {
+          "isInterpolated": false,
+          "key": "DB_NAME",
+          "source": {
+            "endLine": 7,
+            "startLine": 7,
+          },
+          "value": "gitea",
+        },
+        {
+          "isInterpolated": false,
+          "key": "DB_USER",
+          "source": {
+            "endLine": 8,
+            "startLine": 8,
+          },
+          "value": "gitea",
+        },
+        {
+          "isInterpolated": false,
+          "key": "DB_PASSWD",
+          "source": {
+            "endLine": 9,
+            "startLine": 9,
+          },
+          "value": "gitea",
+        },
+      ],
+      "image": {
+        "name": "gitea/gitea",
+        "raw": "gitea/gitea:latest",
+        "tag": "latest",
+      },
+      "name": "gitea",
+      "networks": [
+        {
+          "aliases": [],
+          "network": "default",
+          "source": {
+            "endLine": 14,
+            "startLine": 2,
+          },
+        },
+      ],
+      "ports": [
+        {
+          "hostIp": "0.0.0.0",
+          "protocol": "tcp",
+          "published": {
+            "end": 3000,
+            "start": 3000,
+          },
+          "raw": "3000:3000",
+          "source": {
+            "endLine": 14,
+            "startLine": 14,
+          },
+          "target": {
+            "end": 3000,
+            "start": 3000,
+          },
+          "unresolved": false,
+        },
+      ],
+      "profiles": [],
+      "source": {
+        "endLine": 14,
+        "startLine": 2,
+      },
+      "volumes": [
+        {
+          "raw": "git_data:/data",
+          "readOnly": false,
+          "source": "git_data",
+          "sourceRange": {
+            "endLine": 12,
+            "startLine": 12,
+          },
+          "target": "/data",
+          "type": "volume",
+        },
+      ],
+    },
+    {
+      "dependsOn": [],
+      "envFiles": [],
+      "environment": [
+        {
+          "isInterpolated": false,
+          "key": "POSTGRES_USER",
+          "source": {
+            "endLine": 18,
+            "startLine": 18,
+          },
+          "value": "gitea",
+        },
+        {
+          "isInterpolated": false,
+          "key": "POSTGRES_PASSWORD",
+          "source": {
+            "endLine": 19,
+            "startLine": 19,
+          },
+          "value": "gitea",
+        },
+        {
+          "isInterpolated": false,
+          "key": "POSTGRES_DB",
+          "source": {
+            "endLine": 20,
+            "startLine": 20,
+          },
+          "value": "gitea",
+        },
+      ],
+      "image": {
+        "name": "postgres",
+        "raw": "postgres:alpine",
+        "tag": "alpine",
+      },
+      "name": "db",
+      "networks": [
+        {
+          "aliases": [],
+          "network": "default",
+          "source": {
+            "endLine": 25,
+            "startLine": 15,
+          },
+        },
+      ],
+      "ports": [],
+      "profiles": [],
+      "source": {
+        "endLine": 25,
+        "startLine": 15,
+      },
+      "volumes": [
+        {
+          "raw": "db_data:/var/lib/postgresql/data",
+          "readOnly": false,
+          "source": "db_data",
+          "sourceRange": {
+            "endLine": 23,
+            "startLine": 23,
+          },
+          "target": "/var/lib/postgresql/data",
+          "type": "volume",
+        },
+      ],
+    },
+  ],
+  "unresolvedVars": [],
+  "volumes": [
+    {
+      "external": false,
+      "name": "db_data",
+      "source": {
+        "endLine": 27,
+        "startLine": 27,
+      },
+    },
+    {
+      "external": false,
+      "name": "git_data",
+      "source": {
+        "endLine": 28,
+        "startLine": 28,
+      },
+    },
+  ],
+}
+`;
+
+exports[`fixtures > ac-minecraft.yml dinormalisasi tanpa error 1`] = `
+{
+  "hasVersionField": false,
+  "networks": [
+    {
+      "declared": false,
+      "external": false,
+      "isDefault": true,
+      "name": "default",
+      "subnets": [],
+    },
+  ],
+  "services": [
+    {
+      "dependsOn": [],
+      "envFiles": [],
+      "environment": [
+        {
+          "isInterpolated": false,
+          "key": "EULA",
+          "source": {
+            "endLine": 7,
+            "startLine": 7,
+          },
+          "value": "TRUE",
+        },
+      ],
+      "image": {
+        "name": "itzg/minecraft-server",
+        "raw": "itzg/minecraft-server",
+      },
+      "name": "minecraft",
+      "networks": [
+        {
+          "aliases": [],
+          "network": "default",
+          "source": {
+            "endLine": 13,
+            "startLine": 2,
+          },
+        },
+      ],
+      "ports": [
+        {
+          "hostIp": "0.0.0.0",
+          "protocol": "tcp",
+          "published": {
+            "end": 25565,
+            "start": 25565,
+          },
+          "raw": "25565:25565",
+          "source": {
+            "endLine": 5,
+            "startLine": 5,
+          },
+          "target": {
+            "end": 25565,
+            "start": 25565,
+          },
+          "unresolved": false,
+        },
+      ],
+      "profiles": [],
+      "source": {
+        "endLine": 13,
+        "startLine": 2,
+      },
+      "volumes": [
+        {
+          "raw": "~/minecraft_data:/data",
+          "readOnly": false,
+          "source": "~/minecraft_data",
+          "sourceRange": {
+            "endLine": 13,
+            "startLine": 13,
+          },
+          "target": "/data",
+          "type": "bind",
+        },
+      ],
+    },
+  ],
+  "unresolvedVars": [],
+  "volumes": [],
+}
+`;
+
+exports[`fixtures > ac-nextcloud-redis-mariadb.yml dinormalisasi tanpa error 1`] = `
+{
+  "hasVersionField": false,
+  "networks": [
+    {
+      "declared": true,
+      "external": false,
+      "isDefault": false,
+      "name": "dbnet",
+      "source": {
+        "endLine": 44,
+        "startLine": 44,
+      },
+      "subnets": [],
+    },
+    {
+      "declared": true,
+      "external": false,
+      "isDefault": false,
+      "name": "redisnet",
+      "source": {
+        "endLine": 45,
+        "startLine": 45,
+      },
+      "subnets": [],
+    },
+  ],
+  "services": [
+    {
+      "dependsOn": [],
+      "envFiles": [],
+      "environment": [
+        {
+          "isInterpolated": false,
+          "key": "REDIS_HOST",
+          "source": {
+            "endLine": 13,
+            "startLine": 13,
+          },
+          "value": "redis",
+        },
+        {
+          "isInterpolated": false,
+          "key": "MYSQL_HOST",
+          "source": {
+            "endLine": 14,
+            "startLine": 14,
+          },
+          "value": "db",
+        },
+        {
+          "isInterpolated": false,
+          "key": "MYSQL_DATABASE",
+          "source": {
+            "endLine": 15,
+            "startLine": 15,
+          },
+          "value": "nextcloud",
+        },
+        {
+          "isInterpolated": false,
+          "key": "MYSQL_USER",
+          "source": {
+            "endLine": 16,
+            "startLine": 16,
+          },
+          "value": "nextcloud",
+        },
+        {
+          "isInterpolated": false,
+          "key": "MYSQL_PASSWORD",
+          "source": {
+            "endLine": 17,
+            "startLine": 17,
+          },
+          "value": "nextcloud",
+        },
+      ],
+      "image": {
+        "name": "nextcloud",
+        "raw": "nextcloud:apache",
+        "tag": "apache",
+      },
+      "name": "nc",
+      "networks": [
+        {
+          "aliases": [],
+          "network": "redisnet",
+          "source": {
+            "endLine": 10,
+            "startLine": 10,
+          },
+        },
+        {
+          "aliases": [],
+          "network": "dbnet",
+          "source": {
+            "endLine": 11,
+            "startLine": 11,
+          },
+        },
+      ],
+      "ports": [
+        {
+          "hostIp": "0.0.0.0",
+          "protocol": "tcp",
+          "published": {
+            "end": 80,
+            "start": 80,
+          },
+          "raw": "80:80",
+          "source": {
+            "endLine": 6,
+            "startLine": 6,
+          },
+          "target": {
+            "end": 80,
+            "start": 80,
+          },
+          "unresolved": false,
+        },
+      ],
+      "profiles": [],
+      "source": {
+        "endLine": 17,
+        "startLine": 2,
+      },
+      "volumes": [
+        {
+          "raw": "nc_data:/var/www/html",
+          "readOnly": false,
+          "source": "nc_data",
+          "sourceRange": {
+            "endLine": 8,
+            "startLine": 8,
+          },
+          "target": "/var/www/html",
+          "type": "volume",
+        },
+      ],
+    },
+    {
+      "dependsOn": [],
+      "envFiles": [],
+      "environment": [],
+      "image": {
+        "name": "redis",
+        "raw": "redis:alpine",
+        "tag": "alpine",
+      },
+      "name": "redis",
+      "networks": [
+        {
+          "aliases": [],
+          "network": "redisnet",
+          "source": {
+            "endLine": 22,
+            "startLine": 22,
+          },
+        },
+      ],
+      "ports": [],
+      "profiles": [],
+      "source": {
+        "endLine": 24,
+        "startLine": 18,
+      },
+      "volumes": [],
+    },
+    {
+      "dependsOn": [],
+      "envFiles": [],
+      "environment": [
+        {
+          "isInterpolated": false,
+          "key": "MYSQL_DATABASE",
+          "source": {
+            "endLine": 34,
+            "startLine": 34,
+          },
+          "value": "nextcloud",
+        },
+        {
+          "isInterpolated": false,
+          "key": "MYSQL_USER",
+          "source": {
+            "endLine": 35,
+            "startLine": 35,
+          },
+          "value": "nextcloud",
+        },
+        {
+          "isInterpolated": false,
+          "key": "MYSQL_ROOT_PASSWORD",
+          "source": {
+            "endLine": 36,
+            "startLine": 36,
+          },
+          "value": "nextcloud",
+        },
+        {
+          "isInterpolated": false,
+          "key": "MYSQL_PASSWORD",
+          "source": {
+            "endLine": 37,
+            "startLine": 37,
+          },
+          "value": "nextcloud",
+        },
+      ],
+      "image": {
+        "name": "mariadb",
+        "raw": "mariadb:10.5",
+        "tag": "10.5",
+      },
+      "name": "db",
+      "networks": [
+        {
+          "aliases": [],
+          "network": "dbnet",
+          "source": {
+            "endLine": 32,
+            "startLine": 32,
+          },
+        },
+      ],
+      "ports": [],
+      "profiles": [],
+      "source": {
+        "endLine": 39,
+        "startLine": 25,
+      },
+      "volumes": [
+        {
+          "raw": "db_data:/var/lib/mysql",
+          "readOnly": false,
+          "source": "db_data",
+          "sourceRange": {
+            "endLine": 30,
+            "startLine": 30,
+          },
+          "target": "/var/lib/mysql",
+          "type": "volume",
+        },
+      ],
+    },
+  ],
+  "unresolvedVars": [],
+  "volumes": [
+    {
+      "external": false,
+      "name": "db_data",
+      "source": {
+        "endLine": 41,
+        "startLine": 41,
+      },
+    },
+    {
+      "external": false,
+      "name": "nc_data",
+      "source": {
+        "endLine": 42,
+        "startLine": 42,
+      },
+    },
+  ],
+}
+`;
+
+exports[`fixtures > ac-nginx-flask-mysql.yml dinormalisasi tanpa error 1`] = `
+{
+  "hasVersionField": false,
+  "networks": [
+    {
+      "declared": true,
+      "external": false,
+      "isDefault": false,
+      "name": "backnet",
+      "source": {
+        "endLine": 61,
+        "startLine": 61,
+      },
+      "subnets": [],
+    },
+    {
+      "declared": true,
+      "external": false,
+      "isDefault": false,
+      "name": "frontnet",
+      "source": {
+        "endLine": 62,
+        "startLine": 62,
+      },
+      "subnets": [],
+    },
+  ],
+  "services": [
+    {
+      "dependsOn": [],
+      "envFiles": [],
+      "environment": [
+        {
+          "isInterpolated": false,
+          "key": "MYSQL_DATABASE",
+          "source": {
+            "endLine": 21,
+            "startLine": 21,
+          },
+          "value": "example",
+        },
+        {
+          "isInterpolated": false,
+          "key": "MYSQL_ROOT_PASSWORD_FILE",
+          "source": {
+            "endLine": 22,
+            "startLine": 22,
+          },
+          "value": "/run/secrets/db-password",
+        },
+      ],
+      "healthcheck": {
+        "disabled": false,
+        "test": "mysqladmin ping -h 127.0.0.1 --password="$(cat /run/secrets/db-password)" --silent",
+      },
+      "image": {
+        "name": "mariadb",
+        "raw": "mariadb:10-focal",
+        "tag": "10-focal",
+      },
+      "name": "db",
+      "networks": [
+        {
+          "aliases": [],
+          "network": "backnet",
+          "source": {
+            "endLine": 19,
+            "startLine": 19,
+          },
+        },
+      ],
+      "ports": [],
+      "profiles": [],
+      "source": {
+        "endLine": 25,
+        "startLine": 2,
+      },
+      "volumes": [
+        {
+          "raw": "db-data:/var/lib/mysql",
+          "readOnly": false,
+          "source": "db-data",
+          "sourceRange": {
+            "endLine": 17,
+            "startLine": 17,
+          },
+          "target": "/var/lib/mysql",
+          "type": "volume",
+        },
+      ],
+    },
+    {
+      "build": {
+        "context": "backend",
+      },
+      "dependsOn": [
+        {
+          "condition": "service_healthy",
+          "service": "db",
+          "source": {
+            "endLine": 41,
+            "startLine": 40,
+          },
+        },
+      ],
+      "envFiles": [],
+      "environment": [],
+      "name": "backend",
+      "networks": [
+        {
+          "aliases": [],
+          "network": "backnet",
+          "source": {
+            "endLine": 37,
+            "startLine": 37,
+          },
+        },
+        {
+          "aliases": [],
+          "network": "frontnet",
+          "source": {
+            "endLine": 38,
+            "startLine": 38,
+          },
+        },
+      ],
+      "ports": [
+        {
+          "hostIp": "0.0.0.0",
+          "protocol": "tcp",
+          "published": {
+            "end": 8000,
+            "start": 8000,
+          },
+          "raw": "8000:8000",
+          "source": {
+            "endLine": 35,
+            "startLine": 35,
+          },
+          "target": {
+            "end": 8000,
+            "start": 8000,
+          },
+          "unresolved": false,
+        },
+      ],
+      "profiles": [],
+      "source": {
+        "endLine": 41,
+        "startLine": 27,
+      },
+      "volumes": [],
+    },
+    {
+      "build": {
+        "context": "proxy",
+      },
+      "dependsOn": [
+        {
+          "condition": "service_started",
+          "service": "backend",
+          "source": {
+            "endLine": 49,
+            "startLine": 49,
+          },
+        },
+      ],
+      "envFiles": [],
+      "environment": [],
+      "name": "proxy",
+      "networks": [
+        {
+          "aliases": [],
+          "network": "frontnet",
+          "source": {
+            "endLine": 51,
+            "startLine": 51,
+          },
+        },
+      ],
+      "ports": [
+        {
+          "hostIp": "0.0.0.0",
+          "protocol": "tcp",
+          "published": {
+            "end": 80,
+            "start": 80,
+          },
+          "raw": "80:80",
+          "source": {
+            "endLine": 47,
+            "startLine": 47,
+          },
+          "target": {
+            "end": 80,
+            "start": 80,
+          },
+          "unresolved": false,
+        },
+      ],
+      "profiles": [],
+      "source": {
+        "endLine": 51,
+        "startLine": 43,
+      },
+      "volumes": [],
+    },
+  ],
+  "unresolvedVars": [],
+  "volumes": [
+    {
+      "external": false,
+      "name": "db-data",
+      "source": {
+        "endLine": 54,
+        "startLine": 54,
+      },
+    },
+  ],
+}
+`;
+
+exports[`fixtures > ac-plex.yml dinormalisasi tanpa error 1`] = `
+{
+  "hasVersionField": false,
+  "networks": [],
+  "services": [
+    {
+      "dependsOn": [],
+      "envFiles": [],
+      "environment": [
+        {
+          "isInterpolated": false,
+          "key": "VERSION",
+          "source": {
+            "endLine": 7,
+            "startLine": 7,
+          },
+          "value": "docker",
+        },
+      ],
+      "image": {
+        "name": "linuxserver/plex",
+        "raw": "linuxserver/plex",
+      },
+      "name": "plex",
+      "networkMode": "host",
+      "networks": [],
+      "ports": [],
+      "profiles": [],
+      "source": {
+        "endLine": 10,
+        "startLine": 2,
+      },
+      "volumes": [
+        {
+          "raw": "\${PLEX_MEDIA_PATH}:/media/",
+          "readOnly": false,
+          "source": "\${PLEX_MEDIA_PATH}",
+          "sourceRange": {
+            "endLine": 10,
+            "startLine": 10,
+          },
+          "target": "/media/",
+          "type": "bind",
+        },
+      ],
+    },
+  ],
+  "unresolvedVars": [
+    {
+      "name": "PLEX_MEDIA_PATH",
+      "raw": "\${PLEX_MEDIA_PATH}",
+      "service": "plex",
+      "source": {
+        "endLine": 10,
+        "startLine": 10,
+      },
+    },
+  ],
+  "volumes": [],
+}
+`;
+
+exports[`fixtures > ac-postgresql-pgadmin.yml dinormalisasi tanpa error 1`] = `
+{
+  "hasVersionField": false,
+  "networks": [
+    {
+      "declared": false,
+      "external": false,
+      "isDefault": true,
+      "name": "default",
+      "subnets": [],
+    },
+  ],
+  "services": [
+    {
+      "dependsOn": [],
+      "envFiles": [],
+      "environment": [
+        {
+          "isInterpolated": true,
+          "key": "POSTGRES_USER",
+          "source": {
+            "endLine": 6,
+            "startLine": 6,
+          },
+          "value": "\${POSTGRES_USER}",
+        },
+        {
+          "isInterpolated": true,
+          "key": "POSTGRES_PASSWORD",
+          "source": {
+            "endLine": 7,
+            "startLine": 7,
+          },
+          "value": "\${POSTGRES_PW}",
+        },
+        {
+          "isInterpolated": true,
+          "key": "POSTGRES_DB",
+          "source": {
+            "endLine": 8,
+            "startLine": 8,
+          },
+          "value": "\${POSTGRES_DB}",
+        },
+      ],
+      "image": {
+        "name": "postgres",
+        "raw": "postgres:latest",
+        "tag": "latest",
+      },
+      "name": "postgres",
+      "networks": [
+        {
+          "aliases": [],
+          "network": "default",
+          "source": {
+            "endLine": 11,
+            "startLine": 2,
+          },
+        },
+      ],
+      "ports": [
+        {
+          "hostIp": "0.0.0.0",
+          "protocol": "tcp",
+          "published": {
+            "end": 5432,
+            "start": 5432,
+          },
+          "raw": "5432:5432",
+          "source": {
+            "endLine": 10,
+            "startLine": 10,
+          },
+          "target": {
+            "end": 5432,
+            "start": 5432,
+          },
+          "unresolved": false,
+        },
+      ],
+      "profiles": [],
+      "source": {
+        "endLine": 11,
+        "startLine": 2,
+      },
+      "volumes": [],
+    },
+    {
+      "dependsOn": [],
+      "envFiles": [],
+      "environment": [
+        {
+          "isInterpolated": true,
+          "key": "PGADMIN_DEFAULT_EMAIL",
+          "source": {
+            "endLine": 17,
+            "startLine": 17,
+          },
+          "value": "\${PGADMIN_MAIL}",
+        },
+        {
+          "isInterpolated": true,
+          "key": "PGADMIN_DEFAULT_PASSWORD",
+          "source": {
+            "endLine": 18,
+            "startLine": 18,
+          },
+          "value": "\${PGADMIN_PW}",
+        },
+      ],
+      "image": {
+        "name": "dpage/pgadmin4",
+        "raw": "dpage/pgadmin4:latest",
+        "tag": "latest",
+      },
+      "name": "pgadmin",
+      "networks": [
+        {
+          "aliases": [],
+          "network": "default",
+          "source": {
+            "endLine": 21,
+            "startLine": 13,
+          },
+        },
+      ],
+      "ports": [
+        {
+          "hostIp": "0.0.0.0",
+          "protocol": "tcp",
+          "published": {
+            "end": 5050,
+            "start": 5050,
+          },
+          "raw": "5050:80",
+          "source": {
+            "endLine": 20,
+            "startLine": 20,
+          },
+          "target": {
+            "end": 80,
+            "start": 80,
+          },
+          "unresolved": false,
+        },
+      ],
+      "profiles": [],
+      "source": {
+        "endLine": 21,
+        "startLine": 13,
+      },
+      "volumes": [],
+    },
+  ],
+  "unresolvedVars": [
+    {
+      "name": "POSTGRES_USER",
+      "raw": "\${POSTGRES_USER}",
+      "service": "postgres",
+      "source": {
+        "endLine": 6,
+        "startLine": 6,
+      },
+    },
+    {
+      "name": "POSTGRES_PW",
+      "raw": "\${POSTGRES_PW}",
+      "service": "postgres",
+      "source": {
+        "endLine": 7,
+        "startLine": 7,
+      },
+    },
+    {
+      "name": "POSTGRES_DB",
+      "raw": "\${POSTGRES_DB}",
+      "service": "postgres",
+      "source": {
+        "endLine": 8,
+        "startLine": 8,
+      },
+    },
+    {
+      "name": "PGADMIN_MAIL",
+      "raw": "\${PGADMIN_MAIL}",
+      "service": "pgadmin",
+      "source": {
+        "endLine": 17,
+        "startLine": 17,
+      },
+    },
+    {
+      "name": "PGADMIN_PW",
+      "raw": "\${PGADMIN_PW}",
+      "service": "pgadmin",
+      "source": {
+        "endLine": 18,
+        "startLine": 18,
+      },
+    },
+  ],
+  "volumes": [],
+}
+`;
+
+exports[`fixtures > ac-prometheus-grafana.yml dinormalisasi tanpa error 1`] = `
+{
+  "hasVersionField": false,
+  "networks": [
+    {
+      "declared": false,
+      "external": false,
+      "isDefault": true,
+      "name": "default",
+      "subnets": [],
+    },
+  ],
+  "services": [
+    {
+      "dependsOn": [],
+      "envFiles": [],
+      "environment": [],
+      "image": {
+        "name": "prom/prometheus",
+        "raw": "prom/prometheus",
+      },
+      "name": "prometheus",
+      "networks": [
+        {
+          "aliases": [],
+          "network": "default",
+          "source": {
+            "endLine": 12,
+            "startLine": 2,
+          },
+        },
+      ],
+      "ports": [
+        {
+          "hostIp": "0.0.0.0",
+          "protocol": "tcp",
+          "published": {
+            "end": 9090,
+            "start": 9090,
+          },
+          "raw": "9090:9090",
+          "source": {
+            "endLine": 8,
+            "startLine": 8,
+          },
+          "target": {
+            "end": 9090,
+            "start": 9090,
+          },
+          "unresolved": false,
+        },
+      ],
+      "profiles": [],
+      "source": {
+        "endLine": 12,
+        "startLine": 2,
+      },
+      "volumes": [
+        {
+          "raw": "./prometheus:/etc/prometheus",
+          "readOnly": false,
+          "source": "./prometheus",
+          "sourceRange": {
+            "endLine": 11,
+            "startLine": 11,
+          },
+          "target": "/etc/prometheus",
+          "type": "bind",
+        },
+        {
+          "raw": "prom_data:/prometheus",
+          "readOnly": false,
+          "source": "prom_data",
+          "sourceRange": {
+            "endLine": 12,
+            "startLine": 12,
+          },
+          "target": "/prometheus",
+          "type": "volume",
+        },
+      ],
+    },
+    {
+      "dependsOn": [],
+      "envFiles": [],
+      "environment": [
+        {
+          "isInterpolated": false,
+          "key": "GF_SECURITY_ADMIN_USER",
+          "source": {
+            "endLine": 20,
+            "startLine": 20,
+          },
+          "value": "admin",
+        },
+        {
+          "isInterpolated": false,
+          "key": "GF_SECURITY_ADMIN_PASSWORD",
+          "source": {
+            "endLine": 21,
+            "startLine": 21,
+          },
+          "value": "grafana",
+        },
+      ],
+      "image": {
+        "name": "grafana/grafana",
+        "raw": "grafana/grafana",
+      },
+      "name": "grafana",
+      "networks": [
+        {
+          "aliases": [],
+          "network": "default",
+          "source": {
+            "endLine": 23,
+            "startLine": 13,
+          },
+        },
+      ],
+      "ports": [
+        {
+          "hostIp": "0.0.0.0",
+          "protocol": "tcp",
+          "published": {
+            "end": 3000,
+            "start": 3000,
+          },
+          "raw": "3000:3000",
+          "source": {
+            "endLine": 17,
+            "startLine": 17,
+          },
+          "target": {
+            "end": 3000,
+            "start": 3000,
+          },
+          "unresolved": false,
+        },
+      ],
+      "profiles": [],
+      "source": {
+        "endLine": 23,
+        "startLine": 13,
+      },
+      "volumes": [
+        {
+          "raw": "./grafana:/etc/grafana/provisioning/datasources",
+          "readOnly": false,
+          "source": "./grafana",
+          "sourceRange": {
+            "endLine": 23,
+            "startLine": 23,
+          },
+          "target": "/etc/grafana/provisioning/datasources",
+          "type": "bind",
+        },
+      ],
+    },
+  ],
+  "unresolvedVars": [],
+  "volumes": [
+    {
+      "external": false,
+      "name": "prom_data",
+      "source": {
+        "endLine": 25,
+        "startLine": 25,
+      },
+    },
+  ],
+}
+`;
+
+exports[`fixtures > ac-react-express-mongodb.yml dinormalisasi tanpa error 1`] = `
+{
+  "hasVersionField": false,
+  "networks": [
+    {
+      "declared": true,
+      "external": false,
+      "isDefault": false,
+      "name": "react-express",
+      "source": {
+        "endLine": 43,
+        "startLine": 43,
+      },
+      "subnets": [],
+    },
+    {
+      "declared": true,
+      "external": false,
+      "isDefault": false,
+      "name": "express-mongo",
+      "source": {
+        "endLine": 44,
+        "startLine": 44,
+      },
+      "subnets": [],
+    },
+  ],
+  "services": [
+    {
+      "build": {
+        "context": "frontend",
+      },
+      "dependsOn": [
+        {
+          "condition": "service_started",
+          "service": "backend",
+          "source": {
+            "endLine": 16,
+            "startLine": 16,
+          },
+        },
+      ],
+      "envFiles": [],
+      "environment": [],
+      "name": "frontend",
+      "networks": [
+        {
+          "aliases": [],
+          "network": "react-express",
+          "source": {
+            "endLine": 14,
+            "startLine": 14,
+          },
+        },
+      ],
+      "ports": [
+        {
+          "hostIp": "0.0.0.0",
+          "protocol": "tcp",
+          "published": {
+            "end": 3000,
+            "start": 3000,
+          },
+          "raw": "3000:3000",
+          "source": {
+            "endLine": 7,
+            "startLine": 7,
+          },
+          "target": {
+            "end": 3000,
+            "start": 3000,
+          },
+          "unresolved": false,
+        },
+      ],
+      "profiles": [],
+      "source": {
+        "endLine": 16,
+        "startLine": 2,
+      },
+      "volumes": [
+        {
+          "raw": "./frontend:/usr/src/app",
+          "readOnly": false,
+          "source": "./frontend",
+          "sourceRange": {
+            "endLine": 10,
+            "startLine": 10,
+          },
+          "target": "/usr/src/app",
+          "type": "bind",
+        },
+        {
+          "raw": "/usr/src/app/node_modules",
+          "readOnly": false,
+          "sourceRange": {
+            "endLine": 11,
+            "startLine": 11,
+          },
+          "target": "/usr/src/app/node_modules",
+          "type": "volume",
+        },
+      ],
+    },
+    {
+      "build": {
+        "context": "backend",
+      },
+      "dependsOn": [
+        {
+          "condition": "service_started",
+          "service": "mongo",
+          "source": {
+            "endLine": 27,
+            "startLine": 27,
+          },
+        },
+      ],
+      "envFiles": [],
+      "environment": [],
+      "name": "backend",
+      "networks": [
+        {
+          "aliases": [],
+          "network": "express-mongo",
+          "source": {
+            "endLine": 29,
+            "startLine": 29,
+          },
+        },
+        {
+          "aliases": [],
+          "network": "react-express",
+          "source": {
+            "endLine": 30,
+            "startLine": 30,
+          },
+        },
+      ],
+      "ports": [],
+      "profiles": [],
+      "source": {
+        "endLine": 32,
+        "startLine": 18,
+      },
+      "volumes": [
+        {
+          "raw": "./backend:/usr/src/app",
+          "readOnly": false,
+          "source": "./backend",
+          "sourceRange": {
+            "endLine": 24,
+            "startLine": 24,
+          },
+          "target": "/usr/src/app",
+          "type": "bind",
+        },
+        {
+          "raw": "/usr/src/app/node_modules",
+          "readOnly": false,
+          "sourceRange": {
+            "endLine": 25,
+            "startLine": 25,
+          },
+          "target": "/usr/src/app/node_modules",
+          "type": "volume",
+        },
+      ],
+    },
+    {
+      "dependsOn": [],
+      "envFiles": [],
+      "environment": [],
+      "image": {
+        "name": "mongo",
+        "raw": "mongo:4.2.0",
+        "tag": "4.2.0",
+      },
+      "name": "mongo",
+      "networks": [
+        {
+          "aliases": [],
+          "network": "express-mongo",
+          "source": {
+            "endLine": 39,
+            "startLine": 39,
+          },
+        },
+      ],
+      "ports": [],
+      "profiles": [],
+      "source": {
+        "endLine": 41,
+        "startLine": 33,
+      },
+      "volumes": [
+        {
+          "raw": "mongo_data:/data/db",
+          "readOnly": false,
+          "source": "mongo_data",
+          "sourceRange": {
+            "endLine": 37,
+            "startLine": 37,
+          },
+          "target": "/data/db",
+          "type": "volume",
+        },
+      ],
+    },
+  ],
+  "unresolvedVars": [],
+  "volumes": [
+    {
+      "external": false,
+      "name": "mongo_data",
+      "source": {
+        "endLine": 47,
+        "startLine": 47,
+      },
+    },
+  ],
+}
+`;
+
+exports[`fixtures > ac-react-java-mysql.yml dinormalisasi tanpa error 1`] = `
+{
+  "hasVersionField": false,
+  "networks": [
+    {
+      "declared": true,
+      "external": false,
+      "isDefault": false,
+      "name": "react-spring",
+      "source": {
+        "endLine": 57,
+        "startLine": 57,
+      },
+      "subnets": [],
+    },
+    {
+      "declared": true,
+      "external": false,
+      "isDefault": false,
+      "name": "spring-mysql",
+      "source": {
+        "endLine": 58,
+        "startLine": 58,
+      },
+      "subnets": [],
+    },
+  ],
+  "services": [
+    {
+      "build": {
+        "context": "backend",
+      },
+      "dependsOn": [
+        {
+          "condition": "service_healthy",
+          "service": "db",
+          "source": {
+            "endLine": 14,
+            "startLine": 13,
+          },
+        },
+      ],
+      "envFiles": [],
+      "environment": [
+        {
+          "isInterpolated": false,
+          "key": "MYSQL_HOST",
+          "source": {
+            "endLine": 8,
+            "startLine": 8,
+          },
+          "value": "db",
+        },
+      ],
+      "name": "backend",
+      "networks": [
+        {
+          "aliases": [],
+          "network": "react-spring",
+          "source": {
+            "endLine": 10,
+            "startLine": 10,
+          },
+        },
+        {
+          "aliases": [],
+          "network": "spring-mysql",
+          "source": {
+            "endLine": 11,
+            "startLine": 11,
+          },
+        },
+      ],
+      "ports": [],
+      "profiles": [],
+      "source": {
+        "endLine": 14,
+        "startLine": 2,
+      },
+      "volumes": [],
+    },
+    {
+      "dependsOn": [],
+      "envFiles": [],
+      "environment": [
+        {
+          "isInterpolated": false,
+          "key": "MYSQL_DATABASE",
+          "source": {
+            "endLine": 21,
+            "startLine": 21,
+          },
+          "value": "example",
+        },
+        {
+          "isInterpolated": false,
+          "key": "MYSQL_ROOT_PASSWORD_FILE",
+          "source": {
+            "endLine": 22,
+            "startLine": 22,
+          },
+          "value": "/run/secrets/db-password",
+        },
+      ],
+      "healthcheck": {
+        "disabled": false,
+        "test": "mysqladmin ping -h 127.0.0.1 --silent",
+      },
+      "image": {
+        "name": "mariadb",
+        "raw": "mariadb:10.6.4-focal",
+        "tag": "10.6.4-focal",
+      },
+      "name": "db",
+      "networks": [
+        {
+          "aliases": [],
+          "network": "spring-mysql",
+          "source": {
+            "endLine": 34,
+            "startLine": 34,
+          },
+        },
+      ],
+      "ports": [],
+      "profiles": [],
+      "source": {
+        "endLine": 34,
+        "startLine": 15,
+      },
+      "volumes": [
+        {
+          "raw": "db-data:/var/lib/mysql",
+          "readOnly": false,
+          "source": "db-data",
+          "sourceRange": {
+            "endLine": 32,
+            "startLine": 32,
+          },
+          "target": "/var/lib/mysql",
+          "type": "volume",
+        },
+      ],
+    },
+    {
+      "build": {
+        "context": "frontend",
+      },
+      "dependsOn": [
+        {
+          "condition": "service_started",
+          "service": "backend",
+          "source": {
+            "endLine": 47,
+            "startLine": 47,
+          },
+        },
+      ],
+      "envFiles": [],
+      "environment": [],
+      "name": "frontend",
+      "networks": [
+        {
+          "aliases": [],
+          "network": "react-spring",
+          "source": {
+            "endLine": 45,
+            "startLine": 45,
+          },
+        },
+      ],
+      "ports": [
+        {
+          "hostIp": "0.0.0.0",
+          "protocol": "tcp",
+          "published": {
+            "end": 3000,
+            "start": 3000,
+          },
+          "raw": "3000:3000",
+          "source": {
+            "endLine": 40,
+            "startLine": 40,
+          },
+          "target": {
+            "end": 3000,
+            "start": 3000,
+          },
+          "unresolved": false,
+        },
+      ],
+      "profiles": [],
+      "source": {
+        "endLine": 50,
+        "startLine": 35,
+      },
+      "volumes": [
+        {
+          "raw": "./frontend/src:/code/src",
+          "readOnly": false,
+          "source": "./frontend/src",
+          "sourceRange": {
+            "endLine": 42,
+            "startLine": 42,
+          },
+          "target": "/code/src",
+          "type": "bind",
+        },
+        {
+          "raw": "/project/node_modules",
+          "readOnly": false,
+          "sourceRange": {
+            "endLine": 43,
+            "startLine": 43,
+          },
+          "target": "/project/node_modules",
+          "type": "volume",
+        },
+      ],
+    },
+  ],
+  "unresolvedVars": [],
+  "volumes": [
+    {
+      "external": false,
+      "name": "db-data",
+      "source": {
+        "endLine": 52,
+        "startLine": 52,
+      },
+    },
+  ],
+}
+`;
+
+exports[`fixtures > ac-traefik-golang.yml dinormalisasi tanpa error 1`] = `
+{
+  "hasVersionField": false,
+  "networks": [
+    {
+      "declared": false,
+      "external": false,
+      "isDefault": true,
+      "name": "default",
+      "subnets": [],
+    },
+  ],
+  "services": [
+    {
+      "dependsOn": [
+        {
+          "condition": "service_started",
+          "service": "backend",
+          "source": {
+            "endLine": 12,
+            "startLine": 12,
+          },
+        },
+      ],
+      "envFiles": [],
+      "environment": [],
+      "image": {
+        "name": "traefik",
+        "raw": "traefik:2.6",
+        "tag": "2.6",
+      },
+      "name": "frontend",
+      "networks": [
+        {
+          "aliases": [],
+          "network": "default",
+          "source": {
+            "endLine": 12,
+            "startLine": 2,
+          },
+        },
+      ],
+      "ports": [
+        {
+          "hostIp": "0.0.0.0",
+          "protocol": "tcp",
+          "published": {
+            "end": 80,
+            "start": 80,
+          },
+          "raw": "80:80",
+          "source": {
+            "endLine": 7,
+            "startLine": 7,
+          },
+          "target": {
+            "end": 80,
+            "start": 80,
+          },
+          "unresolved": false,
+        },
+      ],
+      "profiles": [],
+      "source": {
+        "endLine": 12,
+        "startLine": 2,
+      },
+      "volumes": [
+        {
+          "raw": "/var/run/docker.sock:/var/run/docker.sock",
+          "readOnly": false,
+          "source": "/var/run/docker.sock",
+          "sourceRange": {
+            "endLine": 10,
+            "startLine": 10,
+          },
+          "target": "/var/run/docker.sock",
+          "type": "bind",
+        },
+      ],
+    },
+    {
+      "build": {
+        "context": "backend",
+      },
+      "dependsOn": [],
+      "envFiles": [],
+      "environment": [],
+      "name": "backend",
+      "networks": [
+        {
+          "aliases": [],
+          "network": "default",
+          "source": {
+            "endLine": 18,
+            "startLine": 13,
+          },
+        },
+      ],
+      "ports": [],
+      "profiles": [],
+      "source": {
+        "endLine": 18,
+        "startLine": 13,
+      },
+      "volumes": [],
+    },
+  ],
+  "unresolvedVars": [],
+  "volumes": [],
+}
+`;
+
+exports[`fixtures > ac-wordpress-mysql.yml dinormalisasi tanpa error 1`] = `
+{
+  "hasVersionField": false,
+  "networks": [
+    {
+      "declared": false,
+      "external": false,
+      "isDefault": true,
+      "name": "default",
+      "subnets": [],
+    },
+  ],
+  "services": [
+    {
+      "dependsOn": [],
+      "envFiles": [],
+      "environment": [
+        {
+          "isInterpolated": false,
+          "key": "MYSQL_ROOT_PASSWORD",
+          "source": {
+            "endLine": 12,
+            "startLine": 12,
+          },
+          "value": "somewordpress",
+        },
+        {
+          "isInterpolated": false,
+          "key": "MYSQL_DATABASE",
+          "source": {
+            "endLine": 13,
+            "startLine": 13,
+          },
+          "value": "wordpress",
+        },
+        {
+          "isInterpolated": false,
+          "key": "MYSQL_USER",
+          "source": {
+            "endLine": 14,
+            "startLine": 14,
+          },
+          "value": "wordpress",
+        },
+        {
+          "isInterpolated": false,
+          "key": "MYSQL_PASSWORD",
+          "source": {
+            "endLine": 15,
+            "startLine": 15,
+          },
+          "value": "wordpress",
+        },
+      ],
+      "image": {
+        "name": "mariadb",
+        "raw": "mariadb:10.6.4-focal",
+        "tag": "10.6.4-focal",
+      },
+      "name": "db",
+      "networks": [
+        {
+          "aliases": [],
+          "network": "default",
+          "source": {
+            "endLine": 18,
+            "startLine": 2,
+          },
+        },
+      ],
+      "ports": [],
+      "profiles": [],
+      "source": {
+        "endLine": 18,
+        "startLine": 2,
+      },
+      "volumes": [
+        {
+          "raw": "db_data:/var/lib/mysql",
+          "readOnly": false,
+          "source": "db_data",
+          "sourceRange": {
+            "endLine": 9,
+            "startLine": 9,
+          },
+          "target": "/var/lib/mysql",
+          "type": "volume",
+        },
+      ],
+    },
+    {
+      "dependsOn": [],
+      "envFiles": [],
+      "environment": [
+        {
+          "isInterpolated": false,
+          "key": "WORDPRESS_DB_HOST",
+          "source": {
+            "endLine": 25,
+            "startLine": 25,
+          },
+          "value": "db",
+        },
+        {
+          "isInterpolated": false,
+          "key": "WORDPRESS_DB_USER",
+          "source": {
+            "endLine": 26,
+            "startLine": 26,
+          },
+          "value": "wordpress",
+        },
+        {
+          "isInterpolated": false,
+          "key": "WORDPRESS_DB_PASSWORD",
+          "source": {
+            "endLine": 27,
+            "startLine": 27,
+          },
+          "value": "wordpress",
+        },
+        {
+          "isInterpolated": false,
+          "key": "WORDPRESS_DB_NAME",
+          "source": {
+            "endLine": 28,
+            "startLine": 28,
+          },
+          "value": "wordpress",
+        },
+      ],
+      "image": {
+        "name": "wordpress",
+        "raw": "wordpress:latest",
+        "tag": "latest",
+      },
+      "name": "wordpress",
+      "networks": [
+        {
+          "aliases": [],
+          "network": "default",
+          "source": {
+            "endLine": 28,
+            "startLine": 19,
+          },
+        },
+      ],
+      "ports": [
+        {
+          "hostIp": "0.0.0.0",
+          "protocol": "tcp",
+          "published": {
+            "end": 80,
+            "start": 80,
+          },
+          "raw": "80:80",
+          "source": {
+            "endLine": 22,
+            "startLine": 22,
+          },
+          "target": {
+            "end": 80,
+            "start": 80,
+          },
+          "unresolved": false,
+        },
+      ],
+      "profiles": [],
+      "source": {
+        "endLine": 28,
+        "startLine": 19,
+      },
+      "volumes": [],
+    },
+  ],
+  "unresolvedVars": [],
+  "volumes": [
+    {
+      "external": false,
+      "name": "db_data",
+      "source": {
+        "endLine": 30,
+        "startLine": 30,
+      },
+    },
+  ],
+}
+`;
+
+exports[`fixtures > laravel-mysql-redis-nginx.yml dinormalisasi tanpa error 1`] = `
+{
+  "hasVersionField": false,
+  "networks": [
+    {
+      "declared": true,
+      "external": false,
+      "isDefault": false,
+      "name": "frontend",
+      "source": {
+        "endLine": 76,
+        "startLine": 76,
+      },
+      "subnets": [],
+    },
+    {
+      "declared": true,
+      "driver": "bridge",
+      "external": false,
+      "isDefault": false,
+      "name": "backend",
+      "source": {
+        "endLine": 78,
+        "startLine": 77,
+      },
+      "subnets": [],
+    },
+  ],
+  "projectName": "laravel-shop",
+  "services": [
+    {
+      "dependsOn": [
+        {
+          "condition": "service_started",
+          "service": "app",
+          "source": {
+            "endLine": 29,
+            "startLine": 29,
+          },
+        },
+      ],
+      "envFiles": [],
+      "environment": [],
+      "image": {
+        "name": "nginx",
+        "raw": "nginx:1.27-alpine",
+        "tag": "1.27-alpine",
+      },
+      "name": "nginx",
+      "networks": [
+        {
+          "aliases": [],
+          "network": "frontend",
+          "source": {
+            "endLine": 31,
+            "startLine": 31,
+          },
+        },
+        {
+          "aliases": [],
+          "network": "backend",
+          "source": {
+            "endLine": 32,
+            "startLine": 32,
+          },
+        },
+      ],
+      "ports": [
+        {
+          "hostIp": "0.0.0.0",
+          "protocol": "tcp",
+          "published": {
+            "end": 80,
+            "start": 80,
+          },
+          "raw": "\${HTTP_PORT:-80}:80",
+          "source": {
+            "endLine": 23,
+            "startLine": 23,
+          },
+          "target": {
+            "end": 80,
+            "start": 80,
+          },
+          "unresolved": false,
+        },
+        {
+          "hostIp": "0.0.0.0",
+          "protocol": "tcp",
+          "published": {
+            "end": 443,
+            "start": 443,
+          },
+          "raw": "443:443",
+          "source": {
+            "endLine": 24,
+            "startLine": 24,
+          },
+          "target": {
+            "end": 443,
+            "start": 443,
+          },
+          "unresolved": false,
+        },
+      ],
+      "profiles": [],
+      "source": {
+        "endLine": 32,
+        "startLine": 20,
+      },
+      "volumes": [
+        {
+          "raw": "./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro",
+          "readOnly": true,
+          "source": "./docker/nginx/default.conf",
+          "sourceRange": {
+            "endLine": 26,
+            "startLine": 26,
+          },
+          "target": "/etc/nginx/conf.d/default.conf",
+          "type": "bind",
+        },
+        {
+          "raw": "./:/var/www/html:ro",
+          "readOnly": true,
+          "source": "./",
+          "sourceRange": {
+            "endLine": 27,
+            "startLine": 27,
+          },
+          "target": "/var/www/html",
+          "type": "bind",
+        },
+      ],
+    },
+    {
+      "build": {
+        "context": ".",
+        "dockerfile": "docker/php/Dockerfile",
+      },
+      "dependsOn": [
+        {
+          "condition": "service_healthy",
+          "service": "mysql",
+          "source": {
+            "endLine": 38,
+            "startLine": 37,
+          },
+        },
+        {
+          "condition": "service_started",
+          "service": "redis",
+          "source": {
+            "endLine": 40,
+            "startLine": 39,
+          },
+        },
+      ],
+      "envFiles": [
+        ".env",
+      ],
+      "environment": [
+        {
+          "isInterpolated": true,
+          "key": "APP_ENV",
+          "source": {
+            "endLine": 10,
+            "startLine": 10,
+          },
+          "value": "production",
+        },
+        {
+          "isInterpolated": false,
+          "key": "DB_HOST",
+          "source": {
+            "endLine": 11,
+            "startLine": 11,
+          },
+          "value": "mysql",
+        },
+        {
+          "isInterpolated": true,
+          "key": "DB_PASSWORD",
+          "source": {
+            "endLine": 12,
+            "startLine": 12,
+          },
+          "value": "\${DB_PASSWORD}",
+        },
+        {
+          "isInterpolated": false,
+          "key": "REDIS_HOST",
+          "source": {
+            "endLine": 13,
+            "startLine": 13,
+          },
+          "value": "redis",
+        },
+      ],
+      "name": "app",
+      "networks": [
+        {
+          "aliases": [],
+          "network": "backend",
+          "source": {
+            "endLine": 17,
+            "startLine": 17,
+          },
+        },
+      ],
+      "ports": [],
+      "profiles": [],
+      "source": {
+        "endLine": 40,
+        "startLine": 34,
+      },
+      "volumes": [
+        {
+          "raw": "./:/var/www/html",
+          "readOnly": false,
+          "source": "./",
+          "sourceRange": {
+            "endLine": 15,
+            "startLine": 15,
+          },
+          "target": "/var/www/html",
+          "type": "bind",
+        },
+        {
+          "raw": "./storage:/var/www/html/storage:rw",
+          "readOnly": false,
+          "source": "./storage",
+          "sourceRange": {
+            "endLine": 16,
+            "startLine": 16,
+          },
+          "target": "/var/www/html/storage",
+          "type": "bind",
+        },
+      ],
+    },
+    {
+      "build": {
+        "context": ".",
+        "dockerfile": "docker/php/Dockerfile",
+      },
+      "dependsOn": [
+        {
+          "condition": "service_started",
+          "service": "app",
+          "source": {
+            "endLine": 45,
+            "startLine": 45,
+          },
+        },
+      ],
+      "envFiles": [
+        ".env",
+      ],
+      "environment": [
+        {
+          "isInterpolated": true,
+          "key": "APP_ENV",
+          "source": {
+            "endLine": 10,
+            "startLine": 10,
+          },
+          "value": "production",
+        },
+        {
+          "isInterpolated": false,
+          "key": "DB_HOST",
+          "source": {
+            "endLine": 11,
+            "startLine": 11,
+          },
+          "value": "mysql",
+        },
+        {
+          "isInterpolated": true,
+          "key": "DB_PASSWORD",
+          "source": {
+            "endLine": 12,
+            "startLine": 12,
+          },
+          "value": "\${DB_PASSWORD}",
+        },
+        {
+          "isInterpolated": false,
+          "key": "REDIS_HOST",
+          "source": {
+            "endLine": 13,
+            "startLine": 13,
+          },
+          "value": "redis",
+        },
+      ],
+      "name": "queue",
+      "networks": [
+        {
+          "aliases": [],
+          "network": "backend",
+          "source": {
+            "endLine": 17,
+            "startLine": 17,
+          },
+        },
+      ],
+      "ports": [],
+      "profiles": [],
+      "source": {
+        "endLine": 45,
+        "startLine": 42,
+      },
+      "volumes": [
+        {
+          "raw": "./:/var/www/html",
+          "readOnly": false,
+          "source": "./",
+          "sourceRange": {
+            "endLine": 15,
+            "startLine": 15,
+          },
+          "target": "/var/www/html",
+          "type": "bind",
+        },
+        {
+          "raw": "./storage:/var/www/html/storage:rw",
+          "readOnly": false,
+          "source": "./storage",
+          "sourceRange": {
+            "endLine": 16,
+            "startLine": 16,
+          },
+          "target": "/var/www/html/storage",
+          "type": "bind",
+        },
+      ],
+    },
+    {
+      "build": {
+        "context": ".",
+        "dockerfile": "docker/php/Dockerfile",
+      },
+      "dependsOn": [],
+      "envFiles": [
+        ".env",
+      ],
+      "environment": [
+        {
+          "isInterpolated": true,
+          "key": "APP_ENV",
+          "source": {
+            "endLine": 10,
+            "startLine": 10,
+          },
+          "value": "production",
+        },
+        {
+          "isInterpolated": false,
+          "key": "DB_HOST",
+          "source": {
+            "endLine": 11,
+            "startLine": 11,
+          },
+          "value": "mysql",
+        },
+        {
+          "isInterpolated": true,
+          "key": "DB_PASSWORD",
+          "source": {
+            "endLine": 12,
+            "startLine": 12,
+          },
+          "value": "\${DB_PASSWORD}",
+        },
+        {
+          "isInterpolated": false,
+          "key": "REDIS_HOST",
+          "source": {
+            "endLine": 13,
+            "startLine": 13,
+          },
+          "value": "redis",
+        },
+      ],
+      "name": "scheduler",
+      "networks": [
+        {
+          "aliases": [],
+          "network": "backend",
+          "source": {
+            "endLine": 17,
+            "startLine": 17,
+          },
+        },
+      ],
+      "ports": [],
+      "profiles": [
+        "cron",
+      ],
+      "source": {
+        "endLine": 50,
+        "startLine": 47,
+      },
+      "volumes": [
+        {
+          "raw": "./:/var/www/html",
+          "readOnly": false,
+          "source": "./",
+          "sourceRange": {
+            "endLine": 15,
+            "startLine": 15,
+          },
+          "target": "/var/www/html",
+          "type": "bind",
+        },
+        {
+          "raw": "./storage:/var/www/html/storage:rw",
+          "readOnly": false,
+          "source": "./storage",
+          "sourceRange": {
+            "endLine": 16,
+            "startLine": 16,
+          },
+          "target": "/var/www/html/storage",
+          "type": "bind",
+        },
+      ],
+    },
+    {
+      "dependsOn": [],
+      "envFiles": [],
+      "environment": [
+        {
+          "isInterpolated": false,
+          "key": "MYSQL_DATABASE",
+          "source": {
+            "endLine": 55,
+            "startLine": 55,
+          },
+          "value": "laravel",
+        },
+        {
+          "isInterpolated": false,
+          "key": "MYSQL_ROOT_PASSWORD",
+          "source": {
+            "endLine": 56,
+            "startLine": 56,
+          },
+          "value": "secret",
+        },
+      ],
+      "healthcheck": {
+        "disabled": false,
+        "test": "mysqladmin ping -h localhost",
+      },
+      "image": {
+        "name": "mysql",
+        "raw": "mysql:8.4",
+        "tag": "8.4",
+      },
+      "name": "mysql",
+      "networks": [
+        {
+          "aliases": [
+            "db",
+          ],
+          "network": "backend",
+          "source": {
+            "endLine": 65,
+            "startLine": 64,
+          },
+        },
+      ],
+      "ports": [],
+      "profiles": [],
+      "source": {
+        "endLine": 65,
+        "startLine": 52,
+      },
+      "volumes": [
+        {
+          "raw": "mysql-data:/var/lib/mysql",
+          "readOnly": false,
+          "source": "mysql-data",
+          "sourceRange": {
+            "endLine": 58,
+            "startLine": 58,
+          },
+          "target": "/var/lib/mysql",
+          "type": "volume",
+        },
+      ],
+    },
+    {
+      "dependsOn": [],
+      "envFiles": [],
+      "environment": [],
+      "image": {
+        "name": "redis",
+        "raw": "redis:7-alpine",
+        "tag": "7-alpine",
+      },
+      "name": "redis",
+      "networks": [
+        {
+          "aliases": [],
+          "network": "backend",
+          "source": {
+            "endLine": 73,
+            "startLine": 73,
+          },
+        },
+      ],
+      "ports": [
+        {
+          "hostIp": "127.0.0.1",
+          "protocol": "tcp",
+          "published": {
+            "end": 6379,
+            "start": 6379,
+          },
+          "raw": "127.0.0.1:6379:6379",
+          "source": {
+            "endLine": 70,
+            "startLine": 70,
+          },
+          "target": {
+            "end": 6379,
+            "start": 6379,
+          },
+          "unresolved": false,
+        },
+      ],
+      "profiles": [],
+      "source": {
+        "endLine": 73,
+        "startLine": 67,
+      },
+      "volumes": [
+        {
+          "raw": "redis-data:/data",
+          "readOnly": false,
+          "source": "redis-data",
+          "sourceRange": {
+            "endLine": 72,
+            "startLine": 72,
+          },
+          "target": "/data",
+          "type": "volume",
+        },
+      ],
+    },
+  ],
+  "unresolvedVars": [
+    {
+      "name": "DB_PASSWORD",
+      "raw": "\${DB_PASSWORD}",
+      "service": "app",
+      "source": {
+        "endLine": 12,
+        "startLine": 12,
+      },
+    },
+    {
+      "name": "DB_PASSWORD",
+      "raw": "\${DB_PASSWORD}",
+      "service": "queue",
+      "source": {
+        "endLine": 12,
+        "startLine": 12,
+      },
+    },
+    {
+      "name": "DB_PASSWORD",
+      "raw": "\${DB_PASSWORD}",
+      "service": "scheduler",
+      "source": {
+        "endLine": 12,
+        "startLine": 12,
+      },
+    },
+  ],
+  "volumes": [
+    {
+      "external": false,
+      "name": "mysql-data",
+      "source": {
+        "endLine": 81,
+        "startLine": 81,
+      },
+    },
+    {
+      "external": false,
+      "name": "redis-data",
+      "source": {
+        "endLine": 82,
+        "startLine": 82,
+      },
+    },
+  ],
+}
+`;
+
+exports[`fixtures > monitoring-host-network.yml dinormalisasi tanpa error 1`] = `
+{
+  "hasVersionField": false,
+  "networks": [
+    {
+      "declared": false,
+      "external": false,
+      "isDefault": true,
+      "name": "default",
+      "subnets": [],
+    },
+  ],
+  "services": [
+    {
+      "dependsOn": [],
+      "envFiles": [],
+      "environment": [],
+      "image": {
+        "name": "prom/node-exporter",
+        "raw": "prom/node-exporter:v1.8.2",
+        "tag": "v1.8.2",
+      },
+      "name": "node-exporter",
+      "networkMode": "host",
+      "networks": [],
+      "ports": [],
+      "profiles": [],
+      "source": {
+        "endLine": 8,
+        "startLine": 3,
+      },
+      "volumes": [
+        {
+          "raw": "/:/host:ro,rslave",
+          "readOnly": true,
+          "source": "/",
+          "sourceRange": {
+            "endLine": 8,
+            "startLine": 8,
+          },
+          "target": "/host",
+          "type": "bind",
+        },
+      ],
+    },
+    {
+      "dependsOn": [],
+      "envFiles": [],
+      "environment": [
+        {
+          "isInterpolated": false,
+          "key": "VPN_SERVICE_PROVIDER",
+          "source": {
+            "endLine": 18,
+            "startLine": 18,
+          },
+          "value": "mullvad",
+        },
+        {
+          "isInterpolated": true,
+          "key": "WIREGUARD_PRIVATE_KEY",
+          "source": {
+            "endLine": 19,
+            "startLine": 19,
+          },
+          "value": "\${WG_KEY:?wajib diisi}",
+        },
+      ],
+      "image": {
+        "name": "qmcgaw/gluetun",
+        "raw": "qmcgaw/gluetun",
+      },
+      "name": "vpn",
+      "networks": [
+        {
+          "aliases": [],
+          "network": "default",
+          "source": {
+            "endLine": 19,
+            "startLine": 10,
+          },
+        },
+      ],
+      "ports": [
+        {
+          "hostIp": "0.0.0.0",
+          "protocol": "tcp",
+          "published": {
+            "end": 8888,
+            "start": 8888,
+          },
+          "raw": "8888:8888/tcp",
+          "source": {
+            "endLine": 14,
+            "startLine": 14,
+          },
+          "target": {
+            "end": 8888,
+            "start": 8888,
+          },
+          "unresolved": false,
+        },
+        {
+          "hostIp": "0.0.0.0",
+          "protocol": "udp",
+          "raw": "\${VPN_PORT}:1194/udp",
+          "source": {
+            "endLine": 15,
+            "startLine": 15,
+          },
+          "target": {
+            "end": 1194,
+            "start": 1194,
+          },
+          "unresolved": true,
+        },
+        {
+          "hostIp": "0.0.0.0",
+          "protocol": "tcp",
+          "published": {
+            "end": 6889,
+            "start": 6881,
+          },
+          "raw": "6881-6889:6881-6889",
+          "source": {
+            "endLine": 16,
+            "startLine": 16,
+          },
+          "target": {
+            "end": 6889,
+            "start": 6881,
+          },
+          "unresolved": false,
+        },
+      ],
+      "profiles": [],
+      "source": {
+        "endLine": 19,
+        "startLine": 10,
+      },
+      "volumes": [],
+    },
+    {
+      "dependsOn": [
+        {
+          "condition": "service_healthy",
+          "service": "vpn",
+          "source": {
+            "endLine": 26,
+            "startLine": 25,
+          },
+        },
+      ],
+      "envFiles": [],
+      "environment": [],
+      "healthcheck": {
+        "disabled": true,
+        "test": "",
+      },
+      "image": {
+        "name": "linuxserver/qbittorrent",
+        "raw": "linuxserver/qbittorrent:latest",
+        "tag": "latest",
+      },
+      "name": "torrent",
+      "networkMode": "service:vpn",
+      "networks": [],
+      "ports": [],
+      "profiles": [],
+      "source": {
+        "endLine": 28,
+        "startLine": 21,
+      },
+      "volumes": [],
+    },
+    {
+      "dependsOn": [],
+      "envFiles": [],
+      "environment": [
+        {
+          "isInterpolated": true,
+          "key": "GF_SECURITY_ADMIN_PASSWORD",
+          "source": {
+            "endLine": 35,
+            "startLine": 35,
+          },
+          "value": "$GRAFANA_PASSWORD",
+        },
+      ],
+      "image": {
+        "name": "grafana/grafana-oss",
+        "raw": "grafana/grafana-oss:11.2.0",
+        "tag": "11.2.0",
+      },
+      "name": "grafana",
+      "networks": [
+        {
+          "aliases": [],
+          "network": "default",
+          "source": {
+            "endLine": 38,
+            "startLine": 30,
+          },
+        },
+      ],
+      "ports": [
+        {
+          "hostIp": "0.0.0.0",
+          "protocol": "tcp",
+          "published": undefined,
+          "raw": "3000",
+          "source": {
+            "endLine": 33,
+            "startLine": 33,
+          },
+          "target": {
+            "end": 3000,
+            "start": 3000,
+          },
+          "unresolved": false,
+        },
+      ],
+      "profiles": [],
+      "source": {
+        "endLine": 38,
+        "startLine": 30,
+      },
+      "volumes": [
+        {
+          "raw": "grafana:/var/lib/grafana",
+          "readOnly": false,
+          "source": "grafana",
+          "sourceRange": {
+            "endLine": 37,
+            "startLine": 37,
+          },
+          "target": "/var/lib/grafana",
+          "type": "volume",
+        },
+        {
+          "raw": "\${CONFIG_DIR:-./config}/grafana:/etc/grafana/provisioning",
+          "readOnly": false,
+          "source": "./config/grafana",
+          "sourceRange": {
+            "endLine": 38,
+            "startLine": 38,
+          },
+          "target": "/etc/grafana/provisioning",
+          "type": "bind",
+        },
+      ],
+    },
+  ],
+  "unresolvedVars": [
+    {
+      "name": "VPN_PORT",
+      "raw": "\${VPN_PORT}",
+      "service": "vpn",
+      "source": {
+        "endLine": 15,
+        "startLine": 15,
+      },
+    },
+    {
+      "name": "WG_KEY",
+      "raw": "\${WG_KEY:?wajib diisi}",
+      "service": "vpn",
+      "source": {
+        "endLine": 19,
+        "startLine": 19,
+      },
+    },
+    {
+      "name": "GRAFANA_PASSWORD",
+      "raw": "$GRAFANA_PASSWORD",
+      "service": "grafana",
+      "source": {
+        "endLine": 35,
+        "startLine": 35,
+      },
+    },
+  ],
+  "volumes": [
+    {
+      "external": false,
+      "name": "grafana",
+      "source": {
+        "endLine": 41,
+        "startLine": 41,
+      },
+    },
+  ],
+}
+`;
+
+exports[`fixtures > static-ip-ipam.yml dinormalisasi tanpa error 1`] = `
+{
+  "hasVersionField": true,
+  "networks": [
+    {
+      "declared": true,
+      "external": false,
+      "isDefault": false,
+      "name": "infra",
+      "source": {
+        "endLine": 58,
+        "startLine": 54,
+      },
+      "subnets": [
+        "172.30.0.0/16",
+      ],
+    },
+    {
+      "declared": true,
+      "external": true,
+      "isDefault": false,
+      "name": "public",
+      "source": {
+        "endLine": 60,
+        "startLine": 59,
+      },
+      "subnets": [],
+    },
+  ],
+  "services": [
+    {
+      "dependsOn": [],
+      "envFiles": [],
+      "environment": [],
+      "image": {
+        "name": "coredns/coredns",
+        "raw": "coredns/coredns:1.11.1",
+        "tag": "1.11.1",
+      },
+      "name": "dns",
+      "networks": [
+        {
+          "aliases": [],
+          "ipv4Address": "172.30.0.53",
+          "network": "infra",
+          "source": {
+            "endLine": 22,
+            "startLine": 21,
+          },
+        },
+      ],
+      "ports": [
+        {
+          "hostIp": "0.0.0.0",
+          "protocol": "udp",
+          "published": {
+            "end": 53,
+            "start": 53,
+          },
+          "raw": "0.0.0.0:53:53/udp",
+          "source": {
+            "endLine": 11,
+            "startLine": 8,
+          },
+          "target": {
+            "end": 53,
+            "start": 53,
+          },
+          "unresolved": false,
+        },
+        {
+          "hostIp": "0.0.0.0",
+          "protocol": "tcp",
+          "published": {
+            "end": 53,
+            "start": 53,
+          },
+          "raw": "53:53/tcp",
+          "source": {
+            "endLine": 14,
+            "startLine": 12,
+          },
+          "target": {
+            "end": 53,
+            "start": 53,
+          },
+          "unresolved": false,
+        },
+      ],
+      "profiles": [],
+      "source": {
+        "endLine": 22,
+        "startLine": 5,
+      },
+      "volumes": [
+        {
+          "raw": "bind: ./Corefile → /Corefile (ro)",
+          "readOnly": true,
+          "source": "./Corefile",
+          "sourceRange": {
+            "endLine": 19,
+            "startLine": 16,
+          },
+          "target": "/Corefile",
+          "type": "bind",
+        },
+      ],
+    },
+    {
+      "dependsOn": [],
+      "envFiles": [],
+      "environment": [],
+      "image": {
+        "name": "traefik",
+        "raw": "traefik:v3.1",
+        "tag": "v3.1",
+      },
+      "name": "proxy",
+      "networks": [
+        {
+          "aliases": [],
+          "ipv4Address": "172.30.0.10",
+          "network": "infra",
+          "source": {
+            "endLine": 33,
+            "startLine": 32,
+          },
+        },
+        {
+          "aliases": [],
+          "network": "public",
+          "source": {
+            "endLine": 34,
+            "startLine": 34,
+          },
+        },
+      ],
+      "ports": [
+        {
+          "hostIp": "0.0.0.0",
+          "protocol": "tcp",
+          "published": {
+            "end": 80,
+            "start": 80,
+          },
+          "raw": "80:80",
+          "source": {
+            "endLine": 27,
+            "startLine": 27,
+          },
+          "target": {
+            "end": 80,
+            "start": 80,
+          },
+          "unresolved": false,
+        },
+        {
+          "hostIp": "::1",
+          "protocol": "tcp",
+          "published": {
+            "end": 8080,
+            "start": 8080,
+          },
+          "raw": "[::1]:8080:8080",
+          "source": {
+            "endLine": 28,
+            "startLine": 28,
+          },
+          "target": {
+            "end": 8080,
+            "start": 8080,
+          },
+          "unresolved": false,
+        },
+      ],
+      "profiles": [],
+      "source": {
+        "endLine": 34,
+        "startLine": 24,
+      },
+      "volumes": [
+        {
+          "raw": "/var/run/docker.sock:/var/run/docker.sock:ro",
+          "readOnly": true,
+          "source": "/var/run/docker.sock",
+          "sourceRange": {
+            "endLine": 30,
+            "startLine": 30,
+          },
+          "target": "/var/run/docker.sock",
+          "type": "bind",
+        },
+      ],
+    },
+    {
+      "dependsOn": [],
+      "envFiles": [],
+      "environment": [
+        {
+          "isInterpolated": false,
+          "key": "POSTGRES_PASSWORD_FILE",
+          "source": {
+            "endLine": 39,
+            "startLine": 39,
+          },
+          "value": "/run/secrets/pg",
+        },
+        {
+          "isInterpolated": false,
+          "key": "PGDATA",
+          "source": {
+            "endLine": 40,
+            "startLine": 40,
+          },
+        },
+      ],
+      "healthcheck": {
+        "disabled": false,
+        "test": "pg_isready -U postgres",
+      },
+      "image": {
+        "digest": "sha256:4ec37d2a07a0067f176fdcc9d4bb633a5724d2cc4f892c7a2046d054bb6939e5",
+        "name": "postgres",
+        "raw": "postgres@sha256:4ec37d2a07a0067f176fdcc9d4bb633a5724d2cc4f892c7a2046d054bb6939e5",
+      },
+      "name": "db",
+      "networks": [
+        {
+          "aliases": [],
+          "ipv4Address": "172.30.1.5",
+          "network": "infra",
+          "source": {
+            "endLine": 51,
+            "startLine": 50,
+          },
+        },
+      ],
+      "ports": [],
+      "profiles": [],
+      "source": {
+        "endLine": 51,
+        "startLine": 36,
+      },
+      "volumes": [
+        {
+          "raw": "volume: pgdata → /var/lib/postgresql/data",
+          "readOnly": false,
+          "source": "pgdata",
+          "sourceRange": {
+            "endLine": 44,
+            "startLine": 42,
+          },
+          "target": "/var/lib/postgresql/data",
+          "type": "volume",
+        },
+        {
+          "raw": "tmpfs: /tmp",
+          "readOnly": false,
+          "source": undefined,
+          "sourceRange": {
+            "endLine": 46,
+            "startLine": 45,
+          },
+          "target": "/tmp",
+          "type": "tmpfs",
+        },
+      ],
+    },
+  ],
+  "unresolvedVars": [],
+  "volumes": [
+    {
+      "driver": "local",
+      "external": false,
+      "name": "pgdata",
+      "source": {
+        "endLine": 64,
+        "startLine": 63,
+      },
+    },
+  ],
+}
+`;

@@ -105,98 +105,6 @@ Prinsip penting:
 
 Bagian paling penting dari proyek. Compose file punya banyak cara penulisan untuk hal yang sama. Normalizer menyeragamkan semuanya, sehingga Rules dan GraphBuilder cukup menangani satu bentuk.
 
-```ts
-/** Posisi di file sumber, untuk menyorot baris di editor. */
-interface SourceRange {
-  startLine: number // 1-based
-  endLine: number
-}
-
-interface ComposeModel {
-  projectName?: string // field top-level `name`
-  services: Service[]
-  networks: Network[] // termasuk network "default" implisit
-  volumes: NamedVolume[]
-  hasVersionField: boolean // `version` sudah usang
-  unresolvedVars: VarRef[] // ${VAR} yang belum punya nilai
-}
-
-interface Service {
-  name: string
-  image?: { name: string; tag?: string; digest?: string; raw: string }
-  build?: { context: string; dockerfile?: string }
-  ports: PortMapping[]
-  networks: ServiceNetworkAttachment[]
-  networkMode?: string // "host", "none", "service:x", "container:x"
-  volumes: VolumeMount[]
-  dependsOn: Dependency[]
-  environment: EnvVar[]
-  envFiles: string[]
-  healthcheck?: { test: string; disabled: boolean }
-  profiles: string[]
-  source: SourceRange
-}
-
-interface PortMapping {
-  hostIp: string // default "0.0.0.0"
-  published?: PortRange // undefined = port acak dari Docker
-  target: PortRange
-  protocol: 'tcp' | 'udp'
-  raw: string // teks asli, untuk ditampilkan
-  source: SourceRange
-}
-
-interface PortRange {
-  start: number
-  end: number
-} // port tunggal: start === end
-
-interface ServiceNetworkAttachment {
-  network: string
-  aliases: string[]
-  ipv4Address?: string
-  source: SourceRange
-}
-
-interface Network {
-  name: string // nama key di compose
-  isDefault: boolean // network "default" implisit
-  external: boolean
-  driver?: string
-  subnets: string[] // dari ipam.config[].subnet, format CIDR
-  declared: boolean // ada di top-level `networks:`?
-  source?: SourceRange
-}
-
-interface VolumeMount {
-  type: 'volume' | 'bind' | 'tmpfs'
-  source?: string // nama volume atau path host
-  target: string // path di container
-  readOnly: boolean
-  raw: string
-  sourceRange: SourceRange
-}
-
-interface NamedVolume {
-  name: string
-  external: boolean
-  driver?: string
-}
-
-interface Dependency {
-  service: string
-  condition: 'service_started' | 'service_healthy' | 'service_completed_successfully'
-  source: SourceRange
-}
-
-interface EnvVar {
-  key: string
-  value?: string // undefined = diambil dari environment shell
-  isInterpolated: boolean // value memakai ${...}
-  source: SourceRange
-}
-```
-
 ### 6.1 Aturan Normalisasi
 
 | Field                 | Bentuk yang harus didukung                                                                                                                              | Hasil                                                                     |
@@ -437,19 +345,19 @@ Estimasi mengasumsikan pengerjaan paruh waktu, sekitar 8–10 jam per minggu. Se
 
 ## M0 — Persiapan (minggu 1)
 
-- [ ] Inisialisasi Vite + Vue 3 + TypeScript + Tailwind + Vitest
-- [ ] ESLint + Prettier, GitHub Actions untuk menjalankan test di setiap push
+- [x] Inisialisasi Vite + Vue 3 + TypeScript + Tailwind + Vitest
+- [x] ESLint + Prettier, GitHub Actions untuk menjalankan test di setiap push
 - [ ] Deploy halaman kosong ke Vercel atau GitHub Pages
-- [ ] Kumpulkan 10–15 compose file nyata sebagai fixture
+- [x] Kumpulkan 10–15 compose file nyata sebagai fixture
 
 **Selesai bila:** `npm test` berjalan di CI dan URL publik sudah aktif.
 
 ## M1 — Parser dan Normalizer (minggu 2–3)
 
-- [ ] `parser.ts` dengan pelacakan posisi baris
-- [ ] Normalizer untuk ports, networks (termasuk `default` implisit), volumes, depends_on, environment, image, healthcheck
-- [ ] Interpolasi variabel dengan dukungan nilai default
-- [ ] Unit test untuk semua bentuk di tabel 6.1
+- [x] `parser.ts` dengan pelacakan posisi baris
+- [x] Normalizer untuk ports, networks (termasuk `default` implisit), volumes, depends_on, environment, image, healthcheck
+- [x] Interpolasi variabel dengan dukungan nilai default
+- [x] Unit test untuk semua bentuk di tabel 6.1
 
 **Selesai bila:** semua fixture berhasil dinormalisasi tanpa error, dan hasilnya bisa dicek lewat `console.log` atau snapshot test.
 
