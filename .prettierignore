@@ -1,3 +1,4 @@
 # Fixture harus tetap sama persis dengan aslinya
 tests/fixtures/
 tests/__snapshots__/
+src/examples/

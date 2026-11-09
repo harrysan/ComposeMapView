@@ -1,8 +1,11 @@
 import { Document, isMap, LineCounter, parseAllDocuments } from 'yaml'
 import type { SourceRange } from './model'
 
+export type ParseErrorCode = 'syntax' | 'multiDoc' | 'notMapping'
+
 export interface ParseError {
-  message: string
+  code: ParseErrorCode
+  message: string // pesan asli (untuk syntax: dari library yaml, berbahasa Inggris)
   line: number // 1-based
   col: number // 1-based
   source: SourceRange
@@ -27,9 +30,10 @@ export function parse(text: string): ParseResult {
   const docs = parseAllDocuments(text, { lineCounter, merge: true, prettyErrors: false })
   const list = Array.isArray(docs) ? docs : []
 
-  const push = (message: string, offset: number) => {
+  const push = (code: ParseErrorCode, message: string, offset: number) => {
     const pos = lineCounter.linePos(offset)
     errors.push({
+      code,
       message,
       line: pos.line,
       col: pos.col,
@@ -38,11 +42,12 @@ export function parse(text: string): ParseResult {
   }
 
   for (const d of list) {
-    for (const e of d.errors) push(e.message, e.pos[0])
+    for (const e of d.errors) push('syntax', e.message, e.pos[0])
   }
 
   if (list.length > 1) {
     push(
+      'multiDoc',
       'File berisi lebih dari satu dokumen YAML (---). Hanya dokumen pertama yang dipakai.',
       list[1]!.range[0],
     )
@@ -54,7 +59,11 @@ export function parse(text: string): ParseResult {
   if (doc.contents === null) return { doc: null, lineCounter, errors }
 
   if (!isMap(doc.contents)) {
-    push('Root compose file harus berupa mapping (key: value).', doc.contents.range?.[0] ?? 0)
+    push(
+      'notMapping',
+      'Root compose file harus berupa mapping (key: value).',
+      doc.contents.range?.[0] ?? 0,
+    )
     return { doc: null, lineCounter, errors }
   }
 

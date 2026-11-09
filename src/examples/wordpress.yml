@@ -1,0 +1,29 @@
+services:
+  wordpress:
+    image: wordpress:6.6-php8.2-apache
+    ports:
+      - "127.0.0.1:8000:80"
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_PASSWORD: ${WP_DB_PASSWORD:-changeme}
+    volumes:
+      - wp-content:/var/www/html/wp-content
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: mariadb:11.4
+    environment:
+      MARIADB_DATABASE: wordpress
+      MARIADB_PASSWORD: ${WP_DB_PASSWORD:-changeme}
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-changeme}
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect"]
+      interval: 10s
+    volumes:
+      - db-data:/var/lib/mysql
+
+volumes:
+  wp-content:
+  db-data:

@@ -1,0 +1,71 @@
+version: "3.8"
+
+services:
+  gateway:
+    image: traefik:v3.1
+    network_mode: host
+    ports:
+      - "8080:80"
+
+  api:
+    image: ghcr.io/acme/api:2.3.0
+    ports:
+      - "8080:3000"
+    depends_on:
+      - orders
+    networks:
+      - public
+      - internal
+
+  orders:
+    image: ghcr.io/acme/orders:latest
+    ports:
+      - "127.0.0.1:9000-9002:9000-9002"
+    depends_on:
+      - billing
+    networks:
+      internal:
+        ipv4_address: 10.10.5.20
+
+  billing:
+    image: ghcr.io/acme/billing:1.0.4
+    ports:
+      - "9001:9001"
+    depends_on:
+      - orders
+    networks:
+      - internal
+      - cache
+
+  admin:
+    image: ghcr.io/acme/admin:1.1
+    ports:
+      - "8080:8080"
+    networks:
+      - public
+
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+    networks:
+      - internal
+
+  worker:
+    command: node worker.js
+    depends_on:
+      - postgres
+    networks:
+      - internal
+
+networks:
+  public:
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+  internal:
+    ipam:
+      config:
+        - subnet: 172.20.5.0/24

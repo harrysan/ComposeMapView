@@ -18,4 +18,5 @@ jobs:
       - run: npm run format:check
       - run: npm run type-check
       - run: npm run coverage
+      - run: npm run test:perf
       - run: npm run build-only

@@ -363,32 +363,32 @@ Estimasi mengasumsikan pengerjaan paruh waktu, sekitar 8–10 jam per minggu. Se
 
 ## M2 — Diagram Dasar (minggu 4–5)
 
-- [ ] Editor YAML di kiri, diagram di kanan
-- [ ] Node service, node network, node volume, edge `depends_on`
-- [ ] Layout otomatis dengan elkjs
-- [ ] Panel detail saat node diklik
-- [ ] 3 contoh compose file di menu "Contoh"
+- [x] Editor YAML di kiri, diagram di kanan
+- [x] Node service, node network, node volume, edge `depends_on`
+- [x] Layout otomatis dengan elkjs
+- [x] Panel detail saat node diklik
+- [x] 3 contoh compose file di menu "Contoh"
 
 **Selesai bila:** mengetik di editor memperbarui diagram, dan contoh Laravel + MySQL + Redis + Nginx tampil rapi.
 
 ## M3 — Linter (minggu 6–7)
 
-- [ ] Interface `Rule` dan registry aturan
-- [ ] Utilitas CIDR dan test-nya
-- [ ] Semua aturan di tabel 7.1
-- [ ] Panel daftar masalah dengan filter severity
-- [ ] Klik issue → sorot node dan baris editor
-- [ ] Fixture test otomatis dengan `expected.json`
+- [x] Interface `Rule` dan registry aturan
+- [x] Utilitas CIDR dan test-nya
+- [x] Semua aturan di tabel 7.1
+- [x] Panel daftar masalah dengan filter severity
+- [x] Klik issue → sorot node dan baris editor
+- [x] Fixture test otomatis dengan `expected.json`
 
 **Selesai bila:** semua aturan punya test positif dan negatif, dan fixture dari awesome-compose tidak memunculkan error palsu.
 
 ## M4 — Share dan Polish (minggu 8)
 
-- [ ] Link share lewat hash URL + peringatan bila ada rahasia di file
-- [ ] Tampilan mobile berbasis tab
-- [ ] Dark mode
-- [ ] Empty state dan pesan error yang ramah
-- [ ] Uji performa dengan file berisi 50 service
+- [x] Link share lewat hash URL + peringatan bila ada rahasia di file
+- [x] Tampilan mobile berbasis tab
+- [x] Dark mode
+- [x] Empty state dan pesan error yang ramah
+- [x] Uji performa dengan file berisi 50 service
 
 **Selesai bila:** link share bisa dibuka di perangkat lain dan hasilnya identik.
 

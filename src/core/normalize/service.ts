@@ -135,6 +135,16 @@ export function normalizeService(ctx: NormalizeContext, entry: MapEntry): Servic
   const build = normalizeBuild(ctx, get('build'))
   if (build) service.build = build
 
+  const ext = get('extends')
+  const extService = isMapNode(ctx, ext)
+    ? scalarString(ctx, getEntry(ctx, ext, 'service')?.value)
+    : scalarString(ctx, ext)
+  if (extService) {
+    service.extends = { service: extService }
+    const file = scalarString(ctx, getEntry(ctx, ext, 'file')?.value)
+    if (file) service.extends.file = file
+  }
+
   const networkMode = scalarString(ctx, get('network_mode'))
   if (networkMode) service.networkMode = networkMode
 

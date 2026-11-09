@@ -9,6 +9,7 @@ export interface ComposeModel {
   networks: Network[] // termasuk network "default" implisit
   volumes: NamedVolume[]
   hasVersionField: boolean // `version` sudah usang
+  versionSource?: SourceRange
   unresolvedVars: VarRef[] // ${VAR} yang belum punya nilai
 }
 
@@ -32,6 +33,7 @@ export interface Service {
   envFiles: string[]
   healthcheck?: { test: string; disabled: boolean }
   profiles: string[]
+  extends?: { service: string; file?: string } // tidak di-resolve di v1
   source: SourceRange
 }
 

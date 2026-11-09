@@ -36,6 +36,8 @@ export function normalize(
     hasVersionField: getEntry(ctx, root, 'version') !== undefined,
     unresolvedVars: ctx.unresolvedVars,
   }
+  const version = getEntry(ctx, root, 'version')
+  if (version) model.versionSource = version.range
   const name = scalarString(ctx, getEntry(ctx, root, 'name')?.value)
   if (name) model.projectName = name
   return model

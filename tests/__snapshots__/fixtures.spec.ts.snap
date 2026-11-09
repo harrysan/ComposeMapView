@@ -3480,6 +3480,10 @@ exports[`fixtures > static-ip-ipam.yml dinormalisasi tanpa error 1`] = `
     },
   ],
   "unresolvedVars": [],
+  "versionSource": {
+    "endLine": 2,
+    "startLine": 2,
+  },
   "volumes": [
     {
       "driver": "local",
